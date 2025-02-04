@@ -1,12 +1,14 @@
-# Neurotech USC 
+# Neurotech USC BCI UI/UX Repository
+
+## About
 
 Brain Computer Interface project UI/UX Repository
 
-## Frontend
+## Stack
 
 * [![Flutter][Flutter.dev]][Flutter-url]
 
-### Contributors
+## Contributors
 
 <a href="https://github.com/AsherHoltham">
   <img src="https://github.com/AsherHoltham.png" alt="Asher" width="80" height="80" style="border-radius: 50%;" />
@@ -16,6 +18,7 @@ Brain Computer Interface project UI/UX Repository
 </a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- MARKDOWN LINKS & IMAGES -->
 [Flutter-url]: https://flutter.dev/
 [Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white
