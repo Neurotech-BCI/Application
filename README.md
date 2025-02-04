@@ -7,7 +7,7 @@
 
 | [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
 |:---:|:---:|:---:|
-| **[Yaoyue Wang][Yaoyue-Contact]**<br><span style="color: #F9E795; font-style: italic; font-weight: bold;">Team Lead</span> | **[Asher Holtham][Asher-Contact]**<br><span style="color: #2F3C7E; font-style: italic; font-weight: bold;">Development</span> | **[Floyd Stott][Floyd-Contact]**<br><span style="color: #F96167; font-style: italic; font-weight: bold;">Design</span> |
+| **[Yaoyue Wang][Yaoyue-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Asher Holtham][Asher-Contact]**<br>![Development](https://img.shields.io/badge/-Development-2F3C7E?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Flutter-url]: https://flutter.dev/
