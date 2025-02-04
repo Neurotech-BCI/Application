@@ -2,11 +2,17 @@
 
 Brain Computer Interface project UI/UX Repository
 
-## Stack:
-
-### Frontend:
+## Frontend
 
 * [![Flutter][Flutter.dev]][Flutter-url]
+
+### Top contributors:
+
+<a href="https://github.com/Yaoyuewang/USC_BCI_UI-UX/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Yaoyuewang/USC_BCI_UI-UX" alt="contrib.rocks image" />
+</a>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Flutter-url]: https://flutter.dev/
