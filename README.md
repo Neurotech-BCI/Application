@@ -8,22 +8,16 @@ Brain Computer Interface project UI/UX Repository
 
 * [![Flutter][Flutter.dev]][Flutter-url]
 
-## Contributors
+## Team
 
 <a href="https://github.com/Yaoyuewang">
-  <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; display:inline-block;">
-    <img src="https://github.com/Yaoyuewang.png" alt="Yaoyue" width="80" height="80" />
-  </div>
+  <img src="https://github.com/Yaoyuewang.png" alt="Yaoyue" width="80" height="80" />
 </a>
 <a href="https://github.com/AsherHoltham">
-  <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; display:inline-block;">
-    <img src="https://github.com/AsherHoltham.png" alt="Asher" width="80" height="80" />
-  </div>
+  <img src="https://github.com/AsherHoltham.png" alt="Asher" width="80" height="80" />
 </a>
 <a href="https://github.com/floydstott">
-  <div style="width:80px; height:80px; border-radius:50%; overflow:hidden; display:inline-block;">
-    <img src="https://github.com/floydstott.png" alt="Floyd" width="80" height="80" />
-  </div>
+  <img src="https://github.com/floydstott.png" alt="Floyd" width="80" height="80" />
 </a>
 
 <!-- MARKDOWN LINKS & IMAGES -->
