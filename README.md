@@ -1,9 +1,5 @@
 # Neurotech USC BCI UI/UX Repository
 
-## About
-
-Brain Computer Interface project UI/UX Repository
-
 ## Stack
 
 * [![Flutter][Flutter.dev]][Flutter-url]
