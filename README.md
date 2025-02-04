@@ -10,4 +10,4 @@ Brain Computer Interface project UI/UX Repository
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Flutter-url]: https://flutter.dev/
-[Flutter.dev]: "https://upload.wikimedia.org/wikipedia/commons/1/17/Google-flutter-logo.png"
+[Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white
