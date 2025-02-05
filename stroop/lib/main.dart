@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:time/time.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
@@ -251,33 +250,44 @@ class TaskCubit extends Cubit<TaskState> {
   late CsvTrackerCubit csvCubit;
 
   StreamSubscription<TestController>? _controllerSub;
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode mFocusNode = FocusNode();
 
   void init() {
     controllerCubit = state.context.read<TestControllerCubit>();
     objCubit = state.context.read<TestObjectCubit>();
     csvCubit = state.context.read<CsvTrackerCubit>();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      mFocusNode.requestFocus();
+    });
+
     _controllerSub = controllerCubit.stream.listen((controllerState) {
-      if (!controllerState.mStartQuestioning) {
-        final startTime = controllerCubit.state.mStartTime;
-        while (DateTime.now().difference(startTime).inMilliseconds <= 2000) {
-
-        }
-
+      if(controllerState.mStartQuestioning){
+        objCubit.update();
+        controllerCubit.updateQuestioningStart();
       }
-
-      if (!controllerState.mQuestioning) {
-        if (controllerState.mCurrCount > controllerState.mTaskCount) {
+      if (!controllerState.mStartQuestioning) 
+      {
+        final startTime = controllerCubit.state.mStartTime;
+        while (DateTime.now().difference(startTime).inMilliseconds <= 2000) 
+        {
+        }
+      }
+      if (!controllerState.mQuestioning) 
+      {
+        if (controllerState.mCurrCount > controllerState.mTaskCount) 
+        {
           controllerCubit.updateFinished();
-        } else {
+        } 
+        else 
+        {
           updateData();
           waitAfterQuestion();
           controllerCubit.updateQuestioning();
         }
       }
-
-      if(controllerState.mFinished){
+      if(controllerState.mFinished)
+      {
         csvCubit.state.writeOutData();
       }
     });
@@ -406,7 +416,7 @@ class MyHomePage extends StatelessWidget {
                             !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
                               InputOnStart() : // ADD INPUT WIDGET HERE
                               BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
-                                _buildTestObjectView(state, context) : 
+                                _buildTestObjectView(state) : 
                                 BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
                                   _responseOutput(true) :
                                   _responseOutput(false),
@@ -415,15 +425,21 @@ class MyHomePage extends StatelessWidget {
                       );
                     },
                   ),
+
                   BlocBuilder<TaskCubit, TaskState>(
                     builder: (context, state) {
-
+                      return Focus(
+                        focusNode: BlocProvider.of<TaskCubit>(context).mFocusNode,
+                        onKeyEvent: (FocusNode node, KeyEvent event) {
+                          if (event is KeyDownEvent) {
+                            return BlocProvider.of<TaskCubit>(context).processKeyEvent(event);
+                          }
+                          return KeyEventResult.ignored;
+                        }, 
+                        child: Container(),
+                      );
                     }
                   ),
-
-
-                // Timer, Task Count, CSV, and KeyBoard Input logic here. 
-
 
                 ],
               );
@@ -433,15 +449,7 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
-  // Helper function to choose which widget to display
-  Widget _buildTestObjectView(TestObjectState state, BuildContext context) {
-    final  controllerCubit = context.read<TestControllerCubit>();
-    final objCubit = context.read<TestObjectCubit>();
-    if(controllerCubit.state.mStartQuestioning == true)
-    {
-      objCubit.update();
-      controllerCubit.updateQuestioningStart();
-    }
+  Widget _buildTestObjectView(TestObjectState state) {
     if (state.mType == 0) {
       return _buildBoxTask(state.mColor);
     } else if (state.mType == 1) {
@@ -450,8 +458,6 @@ class MyHomePage extends StatelessWidget {
       return _buildTextTask(state.mColor, state.mWord, false);
     }
   }
-
-  // Same widget-building logic, but as private methods in the widget
   Widget _buildBoxTask(Color color) 
   {
     return Container(
@@ -460,7 +466,6 @@ class MyHomePage extends StatelessWidget {
       color: color,
     );
   }
-
   Widget _buildTextTask(Color color, String word, bool colored) 
   {
     return Container(
@@ -476,7 +481,6 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
-  
   Widget _responseOutput(bool correct)
   {
     return Container(
@@ -712,160 +716,3 @@ class ColoredTextExample extends StatelessWidget {
     }
   }
 }
-
-
-/**Container(
-                     width: 120,
-                    height: 100,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Task Count: ${BlocProvider.of<TestControllerCubit>(context).state.mCurrCount}',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  Container(
-                     width: 120,
-                    height: 100,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Questioning: ${BlocProvider.of<TestControllerCubit>(context).state.mQuestioning}',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ), */
-/*
-class InputOnStart extends StatefulWidget {
-  const InputOnStart({super.key});
-
-  @override
-  State<InputOnStart> createState() => _InputOnStartState();
-}
-
-class _InputOnStartState extends State<InputOnStart> {
-  final TextEditingController _tec = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  bool _showWait = false;
-  int counter = 3;
-
-  @override
-  void initState() {
-    super.initState();
-    // Automatically request focus so we can capture keyboard events
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-    final controllerCubit = context.read<TestControllerCubit>();
-    controllerCubit.initKeys();
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    _tec.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // If waiting, just show "Wait..." text
-    if (_showWait) {
-      return Center(
-        child: Text(
-          'Wait... $counter',
-          style: TextStyle(fontSize: 30),
-        ),
-      );
-    }
-
-    // Otherwise, wrap the UI in a Focus widget
-    return Focus(
-      focusNode: _focusNode,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        // Check if user pressed SPACE in a KeyDownEvent
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.space) {
-          _startTask();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 10),
-          RevealTextWidget(),
-          SizedBox(height: 50),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 50,
-                width: 300,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 170, 121, 138),
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Colors.black),
-                ),
-                child: TextField(
-                  controller: _tec,
-                  textAlign: TextAlign.center, // This centers the text
-                  style: const TextStyle(fontSize: 17.0),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Number of Trials Here',
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-          Text('100 Trials if left blank', 
-            style: const TextStyle(fontSize: 15)
-          ),
-          SizedBox(height: 50),
-          Container(
-            height: 50,
-            width: 300,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(112, 135, 119, 125),
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.black),
-            ),
-            child: 
-              Text('Press the Spacebar to Start', 
-              textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                ),
-              )
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _startTask() async {
-    setState(() => _showWait = true);
-    // Parse the text as an integer (default to 100 if invalid)
-    final enteredNumber = int.tryParse(_tec.text) ?? 100;
-    final controllerCubit = context.read<TestControllerCubit>();
-    // Wait 3 seconds
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => counter--);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => counter--);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => counter--);
-    controllerCubit.initStroop(enteredNumber);
-    controllerCubit.updateQuestioning();
-    // Return to the input form (or navigate, based on your app logic)
-    setState(() => _showWait = false);
-  }
-}
-*/
