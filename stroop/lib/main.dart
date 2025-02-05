@@ -105,29 +105,50 @@ class TestControllerCubit extends Cubit<TestController> {
     return numbers;
   }
   void initKeys() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, state.mStartQuestioning, state.mQuestioning, state.mStartTime, state.mEndTime, generateUniqueRandomInts()));
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, state.mFinished, state.mCorrect, 
+    state.mStartQuestioning, state.mQuestioning, 
+    state.mStartTime, state.mEndTime, generateUniqueRandomInts()));
   }
   void initStroop(int cnt) {
-    emit(TestController(cnt, state.mCurrCount, !state.mStarted, state.mFinished, state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+    emit(TestController(cnt, state.mCurrCount, 
+    !state.mStarted, state.mFinished, state.mCorrect,
+     state.mStartQuestioning, state.mQuestioning, state.mStartTime, 
+     state.mEndTime, state.mKeyBoardLayout));
   }
   void updateFinished() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, !state.mFinished, state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, true, state.mCorrect, 
+    state.mStartQuestioning, state.mQuestioning,
+     state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
-  void updateCorrect() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, !state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+  void updateCorrect(bool correct) {
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, state.mFinished, correct, state.mQuestioning, 
+    state.mStartQuestioning, state.mStartTime, state.mEndTime, 
+    state.mKeyBoardLayout));
   }
   void updateQuestioning() {
     if(state.mQuestioning == false)
     {
-      emit(TestController(state.mTaskCount, state.mCurrCount + 1, state.mStarted, state.mFinished, state.mCorrect, true, !state.mQuestioning, DateTime.now(), state.mEndTime, state.mKeyBoardLayout));
+      emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
+      state.mStarted, state.mFinished, state.mCorrect, 
+      !state.mStartQuestioning, !state.mQuestioning, state.mStartTime,
+       state.mEndTime, state.mKeyBoardLayout));
     }
     else
     {
-      emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, state.mStartQuestioning, !state.mQuestioning, state.mStartTime, DateTime.now(), state.mKeyBoardLayout));
+      emit(TestController(state.mTaskCount, state.mCurrCount,
+       state.mStarted, state.mFinished, state.mCorrect,
+        state.mStartQuestioning, !state.mQuestioning, 
+        state.mStartTime, DateTime.now(), state.mKeyBoardLayout));
     }
   }
   void updateQuestioningStart() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, false, state.mQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+    emit(TestController(state.mTaskCount, state.mCurrCount,
+     state.mStarted, state.mFinished, state.mCorrect, 
+     !state.mStartQuestioning, state.mQuestioning,
+      DateTime.now(), state.mEndTime, state.mKeyBoardLayout));
   }
 }
 
@@ -221,6 +242,13 @@ class CsvTrackerCubit extends Cubit<CsvTracker> {
     );
   }
 }
+
+class KeyBoardInput{
+
+}
+
+// ------------------ Main -----------------------
+
 void main() {
   runApp(
     MultiBlocProvider(
@@ -262,9 +290,9 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFB0BEC5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor:   const Color(0xFFB0BEC5),
+        backgroundColor:   const Color.fromARGB(255, 191, 208, 220),
         centerTitle: true,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -307,8 +335,30 @@ class MyHomePage extends StatelessWidget {
                       );
                     },
                   ),
-
-
+                  Container(
+                     width: 120,
+                    height: 100,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Task Count: ${BlocProvider.of<TestControllerCubit>(context).state.mCurrCount}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  Container(
+                     width: 120,
+                    height: 100,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Questioning: ${BlocProvider.of<TestControllerCubit>(context).state.mQuestioning}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
                 // Timer, Task Count, CSV, and KeyBoard Input logic here. 
 
 
@@ -323,10 +373,10 @@ class MyHomePage extends StatelessWidget {
   // Helper function to choose which widget to display
   Widget _buildTestObjectView(TestObjectState state, BuildContext context) {
     final  controllerCubit = context.read<TestControllerCubit>();
-    final objControllerCubit = context.read<TestObjectCubit>();
+    final objCubit = context.read<TestObjectCubit>();
     if(controllerCubit.state.mStartQuestioning == true)
     {
-      objControllerCubit.update();
+      objCubit.update();
       controllerCubit.updateQuestioningStart();
     }
     if (state.mType == 0) {
@@ -474,7 +524,7 @@ class _InputOnStartState extends State<InputOnStart> {
                 height: 50,
                 width: 300,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 176, 106, 130),
+                  color: const Color.fromARGB(255, 170, 121, 138),
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(color: Colors.black),
                 ),
@@ -496,13 +546,22 @@ class _InputOnStartState extends State<InputOnStart> {
             style: const TextStyle(fontSize: 15)
           ),
           SizedBox(height: 50),
-          Text('Press the Spacebar to Start', 
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            )
+          Container(
+            height: 50,
+            width: 300,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(112, 135, 119, 125),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Colors.black),
+            ),
+            child: 
+              Text('Press the Spacebar to Start', 
+              textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 17,
+                ),
+              )
           ),
-          SizedBox(height: 80),
         ],
       ),
     );
@@ -510,11 +569,9 @@ class _InputOnStartState extends State<InputOnStart> {
 
   Future<void> _startTask() async {
     setState(() => _showWait = true);
-
     // Parse the text as an integer (default to 100 if invalid)
     final enteredNumber = int.tryParse(_tec.text) ?? 100;
     final controllerCubit = context.read<TestControllerCubit>();
-
     // Wait 3 seconds
     await Future.delayed(const Duration(seconds: 1));
     setState(() => counter--);
@@ -522,9 +579,8 @@ class _InputOnStartState extends State<InputOnStart> {
     setState(() => counter--);
     await Future.delayed(const Duration(seconds: 1));
     setState(() => counter--);
-
-   controllerCubit.initStroop(enteredNumber);
-   controllerCubit.updateQuestioning();
+    controllerCubit.initStroop(enteredNumber);
+    controllerCubit.updateQuestioning();
     // Return to the input form (or navigate, based on your app logic)
     setState(() => _showWait = false);
   }
@@ -593,3 +649,5 @@ class ColoredTextExample extends StatelessWidget {
     }
   }
 }
+
+
