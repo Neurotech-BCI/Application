@@ -266,31 +266,23 @@ class TaskCubit extends Cubit<TaskState> {
         objCubit.update();
         controllerCubit.updateQuestioningStart();
       }
-      if (!controllerState.mStartQuestioning) 
-      {
-        final startTime = controllerCubit.state.mStartTime;
-        while (DateTime.now().difference(startTime).inMilliseconds <= 2000) 
-        {
-        }
-      }
-      if (!controllerState.mQuestioning) 
-      {
-        if (controllerState.mCurrCount > controllerState.mTaskCount) 
-        {
+      if (!controllerState.mQuestioning) {
+        if (controllerState.mCurrCount > controllerState.mTaskCount) {
           controllerCubit.updateFinished();
-        } 
-        else 
-        {
+        } else {
           updateData();
           waitAfterQuestion();
           controllerCubit.updateQuestioning();
         }
       }
-      if(controllerState.mFinished)
-      {
+      if(controllerState.mFinished) {
         csvCubit.state.writeOutData();
       }
     });
+  }
+
+  void waitAfterQuestion() async {
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   void updateData() {
@@ -324,11 +316,6 @@ class TaskCubit extends Cubit<TaskState> {
     }
     return KeyEventResult.ignored;
   }
-
-  void waitAfterQuestion() async {
-    await Future.delayed(const Duration(seconds: 2));
-  }
-
   @override
   Future<void> close() {
     _controllerSub?.cancel(); // Cancel the subscription to prevent memory leaks.
@@ -364,8 +351,8 @@ class MyApp extends StatelessWidget
   @override
   Widget build( BuildContext context )
   { 
-    return BlocProvider<TestObjectCubit>( 
-      create: (context) => TestObjectCubit(),
+    return BlocProvider<TaskCubit>( 
+      create: (context) => TaskCubit(context),
       child:  MaterialApp( 
         home: MyHomePage(),
       ),
