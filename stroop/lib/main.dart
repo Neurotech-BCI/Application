@@ -90,12 +90,8 @@ class TestControllerCubit extends Cubit<TestController> {
       : super( TestController(0, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
 
   List<int> generateUniqueRandomInts() {
-    // Create a list with numbers from 0 to 5
     List<int> numbers = List.generate(5, (index) => index);
-    
-    // Shuffle the list randomly
     numbers.shuffle(randy);
-    
     return numbers;
   }
   void initKeys() {
@@ -111,20 +107,17 @@ class TestControllerCubit extends Cubit<TestController> {
     state.mEndTime, state.mKeyBoardLayout));
   }
   void updateFinished() {
-    print("updateFinished");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, true, state.mCorrect, 
      true, state.mStartTime, 
      state.mEndTime, state.mKeyBoardLayout));
   }
   void updateCorrect(bool correct) {
-    print("updateCorrect");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, correct, state.mQuestioning, 
     state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
   void updateQuestioning() {
-    print("updateQuestioningin");
     if(state.mQuestioning == false)
     {
       emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
@@ -146,7 +139,7 @@ class TestControllerCubit extends Cubit<TestController> {
 class CsvTracker {
   final List<DateTime> startTimes;
   final List<DateTime> endTimes;
-  final List<double> reactionTimes;
+  final List<int> reactionTimes;
   final List<bool> accuracy;
   final List<bool> timeOut;
 
@@ -163,7 +156,6 @@ class CsvTracker {
   List<List<String>> toCsv() {
     final csvData = <List<String>>[];
 
-    // Add headers
     csvData.add([
       'Start (YYYY-MM-DD HH:MM:SS.microseconds)',
       'End (YYYY-MM-DD HH:MM:SS.microseconds)',
@@ -172,14 +164,13 @@ class CsvTracker {
       'TimeOut (true = Too long)'
     ]);
 
-    // Add data rows
     for (var i = 0; i < startTimes.length; i++) {
       csvData.add([
         startTimes[i].toString(),
         endTimes[i].toString(),
-        reactionTimes[i].toString(), // Round to 2 decimal places
-        boolToInt(accuracy[i]).toString(), // Convert bool to 0 or 1
-        boolToInt(timeOut[i]).toString(), // Convert bool to 0 or 1
+        reactionTimes[i].toString(),
+        boolToInt(accuracy[i]).toString(),
+        boolToInt(timeOut[i]).toString(),
       ]);
     }
 
@@ -193,7 +184,6 @@ class CsvTracker {
 
   void writeOutData() async {
     final csvData = toCsvString();
-    print(csvData);
     final fileName = 'stroop_test_${DateTime.now().toIso8601String()}.csv';
     final dir = await getApplicationDocumentsDirectory();
     final path = '${dir.path}/$fileName';
@@ -204,35 +194,36 @@ class CsvTracker {
 }
 
 class CsvTrackerCubit extends Cubit<CsvTracker> {
-  // Initialize with empty lists
   CsvTrackerCubit()
       : super(const CsvTracker([], [], [], [], []));
 
-  // Push back each item into the lists
-  void update(DateTime startTime, DateTime endTime, double reactionTime,
+  void update(DateTime startTime, DateTime endTime, int reactionTime,
       bool accuracyValue, bool timeOutValue) {
-    final updatedStartTimes = List<DateTime>.from(state.startTimes)
-      ..add(startTime);
-    final updatedEndTimes = List<DateTime>.from(state.endTimes)
-      ..add(endTime);
-    final updatedReactionTimes = List<double>.from(state.reactionTimes)
-      ..add(reactionTime);
-    final updatedAccuracy = List<bool>.from(state.accuracy)
-      ..add(accuracyValue);
-    final updatedTimeOut = List<bool>.from(state.timeOut)
-      ..add(timeOutValue);
+    if(endTime != DateTime.utc(1970, 1, 1)){
+      final updatedStartTimes = List<DateTime>.from(state.startTimes)
+        ..add(startTime);
+      final updatedEndTimes = List<DateTime>.from(state.endTimes)
+        ..add(endTime);
+      final updatedReactionTimes = List<int>.from(state.reactionTimes)
+        ..add(reactionTime);
+      final updatedAccuracy = List<bool>.from(state.accuracy)
+        ..add(accuracyValue);
+      final updatedTimeOut = List<bool>.from(state.timeOut)
+        ..add(timeOutValue);
 
-    emit(
-      CsvTracker(
-        updatedStartTimes,
-        updatedEndTimes,
-        updatedReactionTimes,
-        updatedAccuracy,
-        updatedTimeOut,
-      ),
-    );
+      emit(
+        CsvTracker(
+          updatedStartTimes,
+          updatedEndTimes,
+          updatedReactionTimes,
+          updatedAccuracy,
+          updatedTimeOut,
+        ),
+      );
+    }
   }
 }
+
 class TaskState{
   final BuildContext context;
   const TaskState({required this.context});
@@ -245,7 +236,6 @@ class TaskCubit extends Cubit<TaskState> {
   late CsvTrackerCubit csvCubit;
 
   StreamSubscription<TestController>? _controllerSub;
-
 
   void init() {
     controllerCubit = state.context.read<TestControllerCubit>();
@@ -274,7 +264,7 @@ class TaskCubit extends Cubit<TaskState> {
       }
     });
   }
-    void processKeyEvent(LogicalKeyboardKey key) {
+  void processKeyEvent(LogicalKeyboardKey key) {
     if (controllerCubit.state.mQuestioning) {
       for(int i = 0; i < 5; i++){
         if (key == keys[i]) {
@@ -300,7 +290,7 @@ class TaskCubit extends Cubit<TaskState> {
     final reactionTime = endTime.difference(startTime).inMilliseconds;
     final accuracy = controllerCubit.state.mCorrect;
     final timeOut = reactionTime > 2000;
-    csvCubit.update(startTime, endTime, reactionTime.toDouble(), accuracy, timeOut);
+    csvCubit.update(startTime, endTime, reactionTime, accuracy, timeOut);
   }
 
   @override
@@ -363,33 +353,33 @@ class MyHomePage extends StatelessWidget {
               'Neurotech USC BCI Project 2025',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 18,
               ),
             ),
           ],
         ),
       ),
       body: BlocBuilder<TaskCubit, TaskState>(
-        builder: (context, state) {
-          return Row( //////////////////////////////////////////
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [ 
-              BlocBuilder<TestControllerCubit, TestController>(
-                builder: (context, state) {
-                  return Column( //////////////////////////////////////////
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      BlocBuilder<TestObjectCubit, TestObjectState>(
-                        builder: (context, state) {
-                          return Column( //////////////////////////////////////////
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              BlocProvider.of<TestControllerCubit>(context).state.mFinished ?
-                                _endOutput() :
-                                !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
-                                  InputOnStart() : // ADD INPUT WIDGET HERE
-                                  InputOnTask(),
-                              const SizedBox(height: 24), 
+      builder: (context, state) {
+        return Row( //////////////////////////////////////////
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [ 
+            BlocBuilder<TestControllerCubit, TestController>(
+              builder: (context, state) {
+                return Column( //////////////////////////////////////////
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    BlocBuilder<TestObjectCubit, TestObjectState>(
+                      builder: (context, state) {
+                        return Column( //////////////////////////////////////////
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            BlocProvider.of<TestControllerCubit>(context).state.mFinished ?
+                              _endOutput() :
+                              !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
+                                InputOnStart() : // ADD INPUT WIDGET HERE
+                                InputOnTask(),
+                            const SizedBox(height: 24), 
                             ],
                           );
                         },
@@ -404,6 +394,9 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
+ 
+ 
+ 
   Widget _endOutput()
   {
     return Container(
@@ -485,7 +478,23 @@ class _InputOnStartState extends State<InputOnStart> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 10),
+          Container(
+            height: 50,
+            width: 300,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(112, 135, 119, 125),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Colors.black),
+            ),
+            child: 
+              Text('Press the Spacebar to Start', 
+              textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 17,
+                ),
+              )
+          ),
+          SizedBox(height: 30),
           RevealTextWidget(),
           SizedBox(height: 50),
           Row(
@@ -495,7 +504,7 @@ class _InputOnStartState extends State<InputOnStart> {
                 height: 50,
                 width: 300,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 170, 121, 138),
+                  color: const Color.fromARGB(255, 188, 174, 179),
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(color: Colors.black),
                 ),
@@ -517,22 +526,6 @@ class _InputOnStartState extends State<InputOnStart> {
             style: const TextStyle(fontSize: 15)
           ),
           SizedBox(height: 50),
-          Container(
-            height: 50,
-            width: 300,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(112, 135, 119, 125),
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.black),
-            ),
-            child: 
-              Text('Press the Spacebar to Start', 
-              textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                ),
-              )
-          ),
         ],
       ),
     );
