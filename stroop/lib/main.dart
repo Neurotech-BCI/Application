@@ -7,9 +7,6 @@ import 'package:time/time.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
-import 'package:equatable/equatable.dart';
-
-
 
 // Global colors and words
 final List<Color> colors = [
@@ -178,8 +175,8 @@ class CsvTracker {
       'Start (YYYY-MM-DD HH:MM:SS.microseconds)',
       'End (YYYY-MM-DD HH:MM:SS.microseconds)',
       'Reaction Time (milliseconds)',
-      'Accuracy (true=Correct)',
-      'TimeOut (true=Too long)'
+      'Accuracy (true = Correct)',
+      'TimeOut (true = Too long)'
     ]);
 
     // Add data rows
@@ -187,7 +184,7 @@ class CsvTracker {
       csvData.add([
         startTimes[i].toString(),
         endTimes[i].toString(),
-        ((reactionTimes[i] * 100).round() / 100).toString(), // Round to 2 decimal places
+        reactionTimes[i].toString(), // Round to 2 decimal places
         boolToInt(accuracy[i]).toString(), // Convert bool to 0 or 1
         boolToInt(timeOut[i]).toString(), // Convert bool to 0 or 1
       ]);
@@ -242,9 +239,91 @@ class CsvTrackerCubit extends Cubit<CsvTracker> {
     );
   }
 }
+class TaskState{
+  final BuildContext context;
+  const TaskState({required this.context});
+}
 
-class KeyBoardInput{
+class TaskCubit extends Cubit<TaskState> {
+  TaskCubit(BuildContext context): super( TaskState(context: context));
+  late TestControllerCubit controllerCubit;
+  late TestObjectCubit objCubit;
+  late CsvTrackerCubit csvCubit;
 
+  StreamSubscription<TestController>? _controllerSub;
+  final FocusNode _focusNode = FocusNode();
+
+  void init() {
+    controllerCubit = state.context.read<TestControllerCubit>();
+    objCubit = state.context.read<TestObjectCubit>();
+    csvCubit = state.context.read<CsvTrackerCubit>();
+
+    _controllerSub = controllerCubit.stream.listen((controllerState) {
+      if (!controllerState.mStartQuestioning) {
+        final startTime = controllerCubit.state.mStartTime;
+        while (DateTime.now().difference(startTime).inMilliseconds <= 2000) {
+
+        }
+
+      }
+
+      if (!controllerState.mQuestioning) {
+        if (controllerState.mCurrCount > controllerState.mTaskCount) {
+          controllerCubit.updateFinished();
+        } else {
+          updateData();
+          waitAfterQuestion();
+          controllerCubit.updateQuestioning();
+        }
+      }
+
+      if(controllerState.mFinished){
+        csvCubit.state.writeOutData();
+      }
+    });
+  }
+
+  void updateData() {
+    final startTime = controllerCubit.state.mStartTime;
+    final endTime = controllerCubit.state.mEndTime;
+    final reactionTime = endTime.difference(startTime).inMilliseconds;
+    final accuracy = controllerCubit.state.mCorrect;
+    final timeOut = reactionTime > 2000;
+    csvCubit.update(startTime, endTime, reactionTime.toDouble(), accuracy, timeOut);
+  }
+
+  /// Processes a [KeyEvent] and returns a [KeyEventResult] based on the event.
+  KeyEventResult processKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent && controllerCubit.state.mQuestioning) {
+      for(int i = 0; i < 5; i++){
+        if (event.logicalKey == keys[i]) {
+          if (objCubit.state.mType != 0 && objCubit.state.mWord == words[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
+            controllerCubit.updateCorrect(true);
+            controllerCubit.updateQuestioning();
+          }
+          else if (objCubit.state.mType == 0 && objCubit.state.mColor == colors[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
+            controllerCubit.updateCorrect(true);
+            controllerCubit.updateQuestioning();
+          } else {
+            controllerCubit.updateCorrect(false);
+            controllerCubit.updateQuestioning();
+          }
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void waitAfterQuestion() async {
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  @override
+  Future<void> close() {
+    _controllerSub?.cancel(); // Cancel the subscription to prevent memory leaks.
+    return super.close();
+  }
 }
 
 // ------------------ Main -----------------------
@@ -316,6 +395,7 @@ class MyHomePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+
                   BlocBuilder<TestObjectCubit, TestObjectState>(
                     builder: (context, state) {
                       return Column(
@@ -335,30 +415,13 @@ class MyHomePage extends StatelessWidget {
                       );
                     },
                   ),
-                  Container(
-                     width: 120,
-                    height: 100,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Task Count: ${BlocProvider.of<TestControllerCubit>(context).state.mCurrCount}',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
+                  BlocBuilder<TaskCubit, TaskState>(
+                    builder: (context, state) {
+
+                    }
                   ),
-                  Container(
-                     width: 120,
-                    height: 100,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Questioning: ${BlocProvider.of<TestControllerCubit>(context).state.mQuestioning}',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
+
+
                 // Timer, Task Count, CSV, and KeyBoard Input logic here. 
 
 
@@ -651,3 +714,158 @@ class ColoredTextExample extends StatelessWidget {
 }
 
 
+/**Container(
+                     width: 120,
+                    height: 100,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Task Count: ${BlocProvider.of<TestControllerCubit>(context).state.mCurrCount}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  Container(
+                     width: 120,
+                    height: 100,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Questioning: ${BlocProvider.of<TestControllerCubit>(context).state.mQuestioning}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ), */
+/*
+class InputOnStart extends StatefulWidget {
+  const InputOnStart({super.key});
+
+  @override
+  State<InputOnStart> createState() => _InputOnStartState();
+}
+
+class _InputOnStartState extends State<InputOnStart> {
+  final TextEditingController _tec = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _showWait = false;
+  int counter = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    // Automatically request focus so we can capture keyboard events
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+    final controllerCubit = context.read<TestControllerCubit>();
+    controllerCubit.initKeys();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _tec.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If waiting, just show "Wait..." text
+    if (_showWait) {
+      return Center(
+        child: Text(
+          'Wait... $counter',
+          style: TextStyle(fontSize: 30),
+        ),
+      );
+    }
+
+    // Otherwise, wrap the UI in a Focus widget
+    return Focus(
+      focusNode: _focusNode,
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        // Check if user pressed SPACE in a KeyDownEvent
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.space) {
+          _startTask();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 10),
+          RevealTextWidget(),
+          SizedBox(height: 50),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 50,
+                width: 300,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 170, 121, 138),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: TextField(
+                  controller: _tec,
+                  textAlign: TextAlign.center, // This centers the text
+                  style: const TextStyle(fontSize: 17.0),
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter Number of Trials Here',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          Text('100 Trials if left blank', 
+            style: const TextStyle(fontSize: 15)
+          ),
+          SizedBox(height: 50),
+          Container(
+            height: 50,
+            width: 300,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(112, 135, 119, 125),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Colors.black),
+            ),
+            child: 
+              Text('Press the Spacebar to Start', 
+              textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 17,
+                ),
+              )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _startTask() async {
+    setState(() => _showWait = true);
+    // Parse the text as an integer (default to 100 if invalid)
+    final enteredNumber = int.tryParse(_tec.text) ?? 100;
+    final controllerCubit = context.read<TestControllerCubit>();
+    // Wait 3 seconds
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() => counter--);
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() => counter--);
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() => counter--);
+    controllerCubit.initStroop(enteredNumber);
+    controllerCubit.updateQuestioning();
+    // Return to the input form (or navigate, based on your app logic)
+    setState(() => _showWait = false);
+  }
+}
+*/
