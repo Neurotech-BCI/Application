@@ -218,12 +218,14 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFB0BEC5),
       appBar: AppBar(
+        backgroundColor:   const Color(0xFFB0BEC5),
         centerTitle: true,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Stroop Test'),
+            const Text('Stroop Task Program'),
             Text(
               'Neurotech USC BCI Project 2025',
               style: const TextStyle(
@@ -409,7 +411,7 @@ class _InputOnStartState extends State<InputOnStart> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Use: A(Red), S(Green), D(Blue), F(Purple), G(Brown) Keys \nPress SPACE to start', 
+          Text('Use: A(Red), S(Green), D(Blue), F(Purple), G(Brown) Keys \nPress SPACE to start (No Input is 100 trials)', 
             style: const TextStyle(fontSize: 15)
           ),
           Row(
