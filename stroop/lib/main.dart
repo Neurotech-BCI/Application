@@ -4,7 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:time/time.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
+import 'dart:io';
+
 
 // Global colors and words
 final List<Color> colors = [
@@ -88,9 +91,9 @@ class TestControllerCubit extends Cubit<TestController> {
 
 // ------------------ CsvTracker -----------------------
 class CsvTracker {
-  final List<Duration> startTimes;
-  final List<Duration> endTimes;
-  final List<bool> reactionTimes;
+  final List<DateTime> startTimes;
+  final List<DateTime> endTimes;
+  final List<double> reactionTimes;
   final List<bool> accuracy;
   final List<bool> timeOut;
 
@@ -101,6 +104,49 @@ class CsvTracker {
     this.accuracy,
     this.timeOut,
   );
+
+  int boolToInt(bool value) => value ? 1 : 0;
+
+  List<List<String>> toCsv() {
+    final csvData = <List<String>>[];
+
+    // Add headers
+    csvData.add([
+      'Start (YYYY-MM-DD HH:MM:SS.microseconds)',
+      'End (YYYY-MM-DD HH:MM:SS.microseconds)',
+      'Reaction Time (milliseconds)',
+      'Accuracy (true=Correct)',
+      'TimeOut (true=Too long)'
+    ]);
+
+    // Add data rows
+    for (var i = 0; i < startTimes.length; i++) {
+      csvData.add([
+        startTimes[i].toString(),
+        endTimes[i].toString(),
+        ((reactionTimes[i] * 100).round() / 100).toString(), // Round to 2 decimal places
+        boolToInt(accuracy[i]).toString(), // Convert bool to 0 or 1
+        boolToInt(timeOut[i]).toString(), // Convert bool to 0 or 1
+      ]);
+    }
+
+    return csvData;
+  }
+
+  String toCsvString() {
+    final data = toCsv();
+    return const ListToCsvConverter().convert(data);
+  }
+
+  void writeOutData() async {
+    final csvData = toCsvString();
+    final fileName = 'stroop_test_${DateTime.now().toIso8601String()}.csv';
+    final dir = await getApplicationDocumentsDirectory();
+    final path = '${dir.path}/$fileName';
+    final file = File(path);
+    await file.writeAsString(csvData);
+  }
+
 }
 
 class CsvTrackerCubit extends Cubit<CsvTracker> {
@@ -109,13 +155,13 @@ class CsvTrackerCubit extends Cubit<CsvTracker> {
       : super(const CsvTracker([], [], [], [], []));
 
   // Push back each item into the lists
-  void update(Duration startTime, Duration endTime, bool reactionTime,
+  void update(DateTime startTime, DateTime endTime, double reactionTime,
       bool accuracyValue, bool timeOutValue) {
-    final updatedStartTimes = List<Duration>.from(state.startTimes)
+    final updatedStartTimes = List<DateTime>.from(state.startTimes)
       ..add(startTime);
-    final updatedEndTimes = List<Duration>.from(state.endTimes)
+    final updatedEndTimes = List<DateTime>.from(state.endTimes)
       ..add(endTime);
-    final updatedReactionTimes = List<bool>.from(state.reactionTimes)
+    final updatedReactionTimes = List<double>.from(state.reactionTimes)
       ..add(reactionTime);
     final updatedAccuracy = List<bool>.from(state.accuracy)
       ..add(accuracyValue);
@@ -172,6 +218,22 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Stroop Test'),
+            Text(
+              'Neurotech USC BCI Project 2025',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -180,25 +242,30 @@ class MyHomePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   BlocBuilder<TestObjectCubit, TestObjectState>(
                     builder: (context, state) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-
-                          !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
-                            InputOnStart() : // ADD INPUT WIDGET HERE
-                            BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
-                              _buildTestObjectView(state) : 
-                              BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
-                                _responseOutput(true) :
-                                _responseOutput(false),
+                          BlocProvider.of<TestControllerCubit>(context).state.mFinished ?
+                            _endOutput() :
+                            !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
+                              InputOnStart() : // ADD INPUT WIDGET HERE
+                              BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
+                                _buildTestObjectView(state) : 
+                                BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
+                                  _responseOutput(true) :
+                                  _responseOutput(false),
                           const SizedBox(height: 24), 
                         ],
                       );
                     },
                   ),
+
+
+                // Timer, Task Count, CSV, and KeyBoard Input logic here. 
+
+
                 ],
               );
             },
@@ -258,6 +325,25 @@ class MyHomePage extends StatelessWidget {
           style: TextStyle(
             color: Color.fromARGB(255, 30, 204, 186),
             fontSize: 60,
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _endOutput()
+  {
+    return Container(
+      width: 300,
+      height: 300,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+      ),
+      child: Center(
+        child: Text(
+          'Test Finished: Check CSV for data \n in the Documents folder',
+          style: TextStyle(
+            color: Color.fromARGB(255, 30, 204, 186),
+            fontSize: 25,
           ),
         ),
       ),
@@ -323,7 +409,9 @@ class _InputOnStartState extends State<InputOnStart> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Enter the number of trials you would like to complete and Press SPACE to start'),
+          Text('Use: A(Red), S(Green), D(Blue), F(Purple), G(Brown) Keys \nPress SPACE to start', 
+            style: const TextStyle(fontSize: 15)
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -335,10 +423,10 @@ class _InputOnStartState extends State<InputOnStart> {
                 ),
                 child: TextField(
                   controller: _tec,
-                  style: const TextStyle(fontSize: 30),
+                  style: const TextStyle(fontSize: 20),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    hintText: 'Enter number here',
+                    hintText: 'Enter number of trials here',
                     border: InputBorder.none,
                   ),
                 ),
