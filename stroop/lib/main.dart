@@ -1,3 +1,4 @@
+// Questions still need to timeout after 2000ms if not answered 
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +28,7 @@ final List<LogicalKeyboardKey> keys = [
   LogicalKeyboardKey.keyG,
 ];
 
+final List<String> keyStrings = ['keyA', 'keyS', 'keyD', 'keyF', 'keyG'];
 // Make a top-level Random instance
 final Random randy = Random(DateTime.now().millisecondsSinceEpoch);
 
@@ -87,7 +89,7 @@ class TestController {
 
 class TestControllerCubit extends Cubit<TestController> {
   TestControllerCubit()
-      : super( TestController(0, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
+      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
 
   List<int> generateUniqueRandomInts() {
     List<int> numbers = List.generate(5, (index) => index);
@@ -120,6 +122,7 @@ class TestControllerCubit extends Cubit<TestController> {
   void updateQuestioning() {
     if(state.mQuestioning == false)
     {
+      print('${state.mCurrCount}, ${state.mTaskCount}');
       emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
       state.mStarted, state.mFinished, state.mCorrect, 
       !state.mQuestioning, DateTime.now(),
@@ -243,6 +246,10 @@ class TaskCubit extends Cubit<TaskState> {
     csvCubit = state.context.read<CsvTrackerCubit>();
 
     _controllerSub = controllerCubit.stream.listen((controllerState) {
+      if (controllerState.mCurrCount == controllerState.mTaskCount) 
+      {
+        controllerCubit.updateQuestioning();
+      }
       if(controllerState.mFinished) 
       {
         csvCubit.state.writeOutData();
@@ -395,30 +402,56 @@ class MyHomePage extends StatelessWidget {
     );
   }
  
+  Future<Directory> getDirectory() async {
+        final dir = await getApplicationDocumentsDirectory();
+        return dir;
+  }
  
- 
-  Widget _endOutput()
-  {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-      ),
-      child: Center(
-        child: Text(
-          'Test Finished: Check CSV for data \n in the Documents folder',
-          style: TextStyle(
-            color: Color.fromARGB(255, 30, 204, 186),
-            fontSize: 25,
-          ),
-        ),
-      ),
+  Widget _endOutput() {
+    return FutureBuilder<Directory>(
+      future: getDirectory(), // The asynchronous function to wait for.
+      builder: (
+        BuildContext context, 
+        AsyncSnapshot<Directory> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While the future is loading, show a loading indicator.
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          // If the future returns an error, display the error.
+          return Text(
+            'Error: ${snapshot.error}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 17,
+              color: Color.fromARGB(255, 30, 204, 186),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          // Once the future completes, you have the directory.
+          final Directory dir = snapshot.data!;
+          return Text(
+            'Tests Finished! \n \n Directory path: \n ${dir.path}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Color.fromARGB(255, 30, 204, 186),
+            ),
+          );
+        } else {
+          // In case no data is returned.
+          return const Text(
+            'No directory found',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 17,
+              color: Color.fromARGB(255, 30, 204, 186),
+            ),
+          );
+        }
+      },
     );
   }
 }
-
-
 
 class InputOnStart extends StatefulWidget {
   const InputOnStart({super.key});
@@ -599,7 +632,7 @@ class ColoredTextExample extends StatelessWidget {
           style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18.0),
           children: List.generate(5, (index) {
             return TextSpan(
-              text: '${keys[controllerCubit.state.mKeyBoardLayout[index]].debugName}: ${words[index]}\n',
+              text: '${keyStrings[controllerCubit.state.mKeyBoardLayout[index]]}: ${words[index]}\n',
               style: TextStyle(color: colors[index], fontWeight: FontWeight.bold, fontSize: 18.0),
             );
           }),
@@ -634,7 +667,7 @@ class _InputOnTaskState extends State<InputOnTask> {
   }
 
   @override
-  void dispose() {
+  void dispose() { 
     _focusNode.dispose();
     super.dispose();
   }
