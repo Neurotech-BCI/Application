@@ -67,7 +67,6 @@ class TestController {
   final bool mStarted;
   final bool mFinished;
   final bool mCorrect;
-  final bool mStartQuestioning;
   final bool mQuestioning;
   final DateTime mStartTime;
   final DateTime mEndTime;
@@ -79,7 +78,6 @@ class TestController {
     this.mStarted,
     this.mFinished,
     this.mCorrect,
-    this.mStartQuestioning,
     this.mQuestioning,
     this.mStartTime,
     this.mEndTime,
@@ -89,7 +87,7 @@ class TestController {
 
 class TestControllerCubit extends Cubit<TestController> {
   TestControllerCubit()
-      : super( TestController(0, 0, false, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
+      : super( TestController(0, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
 
   List<int> generateUniqueRandomInts() {
     // Create a list with numbers from 0 to 5
@@ -101,50 +99,48 @@ class TestControllerCubit extends Cubit<TestController> {
     return numbers;
   }
   void initKeys() {
+    print("initKeys");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, state.mCorrect, 
-    state.mStartQuestioning, state.mQuestioning, 
-    state.mStartTime, state.mEndTime, generateUniqueRandomInts()));
+    state.mQuestioning, state.mStartTime, 
+    state.mEndTime, generateUniqueRandomInts()));
   }
   void initStroop(int cnt) {
+    print("initStroop");
     emit(TestController(cnt, state.mCurrCount, 
     !state.mStarted, state.mFinished, state.mCorrect,
-     state.mStartQuestioning, state.mQuestioning, state.mStartTime, 
-     state.mEndTime, state.mKeyBoardLayout));
+    state.mQuestioning, state.mStartTime, 
+    state.mEndTime, state.mKeyBoardLayout));
   }
   void updateFinished() {
+    print("updateFinished");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, true, state.mCorrect, 
-    state.mStartQuestioning, state.mQuestioning,
-     state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+     state.mQuestioning, state.mStartTime, 
+     state.mEndTime, state.mKeyBoardLayout));
   }
   void updateCorrect(bool correct) {
+    print("updateCorrect");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, correct, state.mQuestioning, 
-    state.mStartQuestioning, state.mStartTime, state.mEndTime, 
-    state.mKeyBoardLayout));
+    state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
   void updateQuestioning() {
+    print("updateQuestioningin");
     if(state.mQuestioning == false)
     {
       emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
       state.mStarted, state.mFinished, state.mCorrect, 
-      !state.mStartQuestioning, !state.mQuestioning, state.mStartTime,
-       state.mEndTime, state.mKeyBoardLayout));
+      !state.mQuestioning, DateTime.now(),
+      state.mEndTime, state.mKeyBoardLayout));
     }
     else
     {
       emit(TestController(state.mTaskCount, state.mCurrCount,
-       state.mStarted, state.mFinished, state.mCorrect,
-        state.mStartQuestioning, !state.mQuestioning, 
-        state.mStartTime, DateTime.now(), state.mKeyBoardLayout));
+        state.mStarted, state.mFinished, state.mCorrect,
+        !state.mQuestioning, state.mStartTime, 
+        DateTime.now(), state.mKeyBoardLayout));
     }
-  }
-  void updateQuestioningStart() {
-    emit(TestController(state.mTaskCount, state.mCurrCount,
-     state.mStarted, state.mFinished, state.mCorrect, 
-     !state.mStartQuestioning, state.mQuestioning,
-      DateTime.now(), state.mEndTime, state.mKeyBoardLayout));
   }
 }
 
@@ -250,38 +246,58 @@ class TaskCubit extends Cubit<TaskState> {
   late CsvTrackerCubit csvCubit;
 
   StreamSubscription<TestController>? _controllerSub;
-  final FocusNode mFocusNode = FocusNode();
+
 
   void init() {
     controllerCubit = state.context.read<TestControllerCubit>();
     objCubit = state.context.read<TestObjectCubit>();
     csvCubit = state.context.read<CsvTrackerCubit>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      mFocusNode.requestFocus();
-    });
-
     _controllerSub = controllerCubit.stream.listen((controllerState) {
-      if(controllerState.mStartQuestioning){
+      if(controllerState.mQuestioning)
+      {
         objCubit.update();
-        controllerCubit.updateQuestioningStart();
       }
-      if (!controllerState.mQuestioning) {
-        if (controllerState.mCurrCount > controllerState.mTaskCount) {
+      if (!controllerState.mQuestioning) 
+      {
+        if (controllerState.mCurrCount > controllerState.mTaskCount) 
+        {
           controllerCubit.updateFinished();
-        } else {
+        } 
+        else
+        {
           updateData();
-          waitAfterQuestion();
+          wait();
           controllerCubit.updateQuestioning();
         }
       }
-      if(controllerState.mFinished) {
+      if(controllerState.mFinished) 
+      {
         csvCubit.state.writeOutData();
       }
     });
   }
+    void processKeyEvent(LogicalKeyboardKey key) {
+    if (controllerCubit.state.mQuestioning) {
+      for(int i = 0; i < 5; i++){
+        if (key == keys[i]) {
+          if (objCubit.state.mType != 0 && objCubit.state.mWord == words[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
+            controllerCubit.updateCorrect(true);
+            controllerCubit.updateQuestioning();
+          }
+          else if (objCubit.state.mType == 0 && objCubit.state.mColor == colors[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
+            controllerCubit.updateCorrect(true);
+            controllerCubit.updateQuestioning();
+          } else {
+            controllerCubit.updateCorrect(false);
+            controllerCubit.updateQuestioning();
+          }
+        }
+      }
+    }
+  }
 
-  void waitAfterQuestion() async {
+  Future<void> wait() async {
     await Future.delayed(const Duration(seconds: 2));
   }
 
@@ -294,28 +310,6 @@ class TaskCubit extends Cubit<TaskState> {
     csvCubit.update(startTime, endTime, reactionTime.toDouble(), accuracy, timeOut);
   }
 
-  /// Processes a [KeyEvent] and returns a [KeyEventResult] based on the event.
-  KeyEventResult processKeyEvent(KeyEvent event) {
-    if (event is KeyDownEvent && controllerCubit.state.mQuestioning) {
-      for(int i = 0; i < 5; i++){
-        if (event.logicalKey == keys[i]) {
-          if (objCubit.state.mType != 0 && objCubit.state.mWord == words[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
-            controllerCubit.updateCorrect(true);
-            controllerCubit.updateQuestioning();
-          }
-          else if (objCubit.state.mType == 0 && objCubit.state.mColor == colors[controllerCubit.state.mKeyBoardLayout.indexOf(i)]){
-            controllerCubit.updateCorrect(true);
-            controllerCubit.updateQuestioning();
-          } else {
-            controllerCubit.updateCorrect(false);
-            controllerCubit.updateQuestioning();
-          }
-          return KeyEventResult.handled;
-        }
-      }
-    }
-    return KeyEventResult.ignored;
-  }
   @override
   Future<void> close() {
     _controllerSub?.cancel(); // Cancel the subscription to prevent memory leaks.
@@ -338,24 +332,22 @@ void main() {
         BlocProvider<CsvTrackerCubit>(
           create: (context) => CsvTrackerCubit(),
         ),
+        BlocProvider<TaskCubit>(
+          create: (context) => TaskCubit(context)..init(), // Initialize TaskCubit
+        ),
       ],
       child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget 
-{
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key}); // Add key for performance optimization
 
   @override
-  Widget build( BuildContext context )
-  { 
-    return BlocProvider<TaskCubit>( 
-      create: (context) => TaskCubit(context),
-      child:  MaterialApp( 
-        home: MyHomePage(),
-      ),
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyHomePage(),
     );
   }
 }
@@ -384,106 +376,38 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BlocBuilder<TestControllerCubit, TestController>(
-            builder: (context, state) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-
-                  BlocBuilder<TestObjectCubit, TestObjectState>(
-                    builder: (context, state) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          BlocProvider.of<TestControllerCubit>(context).state.mFinished ?
-                            _endOutput() :
-                            !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
-                              InputOnStart() : // ADD INPUT WIDGET HERE
-                              BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
-                                _buildTestObjectView(state) : 
-                                BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
-                                  _responseOutput(true) :
-                                  _responseOutput(false),
-                          const SizedBox(height: 24), 
-                        ],
-                      );
-                    },
-                  ),
-
-                  BlocBuilder<TaskCubit, TaskState>(
-                    builder: (context, state) {
-                      return Focus(
-                        focusNode: BlocProvider.of<TaskCubit>(context).mFocusNode,
-                        onKeyEvent: (FocusNode node, KeyEvent event) {
-                          if (event is KeyDownEvent) {
-                            return BlocProvider.of<TaskCubit>(context).processKeyEvent(event);
-                          }
-                          return KeyEventResult.ignored;
-                        }, 
-                        child: Container(),
-                      );
-                    }
-                  ),
-
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildTestObjectView(TestObjectState state) {
-    if (state.mType == 0) {
-      return _buildBoxTask(state.mColor);
-    } else if (state.mType == 1) {
-      return _buildTextTask(state.mColor, state.mWord, true);
-    } else {
-      return _buildTextTask(state.mColor, state.mWord, false);
-    }
-  }
-  Widget _buildBoxTask(Color color) 
-  {
-    return Container(
-      width: 100,
-      height: 100,
-      color: color,
-    );
-  }
-  Widget _buildTextTask(Color color, String word, bool colored) 
-  {
-    return Container(
-      width: 120,
-      height: 100,
-      alignment: Alignment.center,
-      child: Text(
-        word,
-        style: TextStyle(
-          color: colored ? color : Colors.black,
-          fontSize: 24,
-        ),
-      ),
-    );
-  }
-  Widget _responseOutput(bool correct)
-  {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-      ),
-      child: Center(
-        child: Text(
-          correct ? 'Correct' : 'Incorrect',
-          style: TextStyle(
-            color: Color.fromARGB(255, 30, 204, 186),
-            fontSize: 60,
-          ),
-        ),
+      body: BlocBuilder<TaskCubit, TaskState>(
+        builder: (context, state) {
+          return Row( //////////////////////////////////////////
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [ 
+              BlocBuilder<TestControllerCubit, TestController>(
+                builder: (context, state) {
+                  return Column( //////////////////////////////////////////
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      BlocBuilder<TestObjectCubit, TestObjectState>(
+                        builder: (context, state) {
+                          return Column( //////////////////////////////////////////
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              BlocProvider.of<TestControllerCubit>(context).state.mFinished ?
+                                _endOutput() :
+                                !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
+                                  InputOnStart() : // ADD INPUT WIDGET HERE
+                                  InputOnTask(),
+                              const SizedBox(height: 24), 
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -703,3 +627,110 @@ class ColoredTextExample extends StatelessWidget {
     }
   }
 }
+
+class InputOnTask extends StatefulWidget {
+  const InputOnTask({super.key});
+
+  @override
+  State<InputOnTask> createState() => _InputOnTaskState();
+}
+
+class _InputOnTaskState extends State<InputOnTask> {
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Automatically request focus so we can capture keyboard events
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _focusNode,
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        // Check if user pressed SPACE in a KeyDownEvent
+        for(int i = 0; i < 5; i++){
+          if (event is KeyDownEvent && event.logicalKey == keys[i]) {
+            BlocProvider.of<TaskCubit>(context).processKeyEvent(keys[i]);
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
+            _buildTestObjectView(BlocProvider.of<TestObjectCubit>(context).state) : 
+            BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
+              _responseOutput(true) :
+              _responseOutput(false),
+          const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildTestObjectView(TestObjectState state) {
+    if (state.mType == 0) {
+      return _buildBoxTask(state.mColor);
+    } else if (state.mType == 1) {
+      return _buildTextTask(state.mColor, state.mWord, true);
+    } else {
+      return _buildTextTask(state.mColor, state.mWord, false);
+    }
+  }
+  Widget _buildBoxTask(Color color) 
+  {
+    return Container(
+      width: 100,
+      height: 100,
+      color: color,
+    );
+  }
+  Widget _buildTextTask(Color color, String word, bool colored) 
+  {
+    return Container(
+      width: 120,
+      height: 100,
+      alignment: Alignment.center,
+      child: Text(
+        word,
+        style: TextStyle(
+          color: colored ? color : Colors.black,
+          fontSize: 24,
+        ),
+      ),
+    );
+  }
+  Widget _responseOutput(bool correct)
+  {
+    return Container(
+      width: 300,
+      height: 300,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+      ),
+      child: Center(
+        child: Text(
+          correct ? 'Correct' : 'Incorrect',
+          style: TextStyle(
+            color: Color.fromARGB(255, 30, 204, 186),
+            fontSize: 60,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
