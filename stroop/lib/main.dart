@@ -99,14 +99,12 @@ class TestControllerCubit extends Cubit<TestController> {
     return numbers;
   }
   void initKeys() {
-    print("initKeys");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, state.mCorrect, 
     state.mQuestioning, state.mStartTime, 
     state.mEndTime, generateUniqueRandomInts()));
   }
   void initStroop(int cnt) {
-    print("initStroop");
     emit(TestController(cnt, state.mCurrCount, 
     !state.mStarted, state.mFinished, state.mCorrect,
     state.mQuestioning, state.mStartTime, 
@@ -116,7 +114,7 @@ class TestControllerCubit extends Cubit<TestController> {
     print("updateFinished");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, true, state.mCorrect, 
-     state.mQuestioning, state.mStartTime, 
+     true, state.mStartTime, 
      state.mEndTime, state.mKeyBoardLayout));
   }
   void updateCorrect(bool correct) {
@@ -195,6 +193,7 @@ class CsvTracker {
 
   void writeOutData() async {
     final csvData = toCsvString();
+    print(csvData);
     final fileName = 'stroop_test_${DateTime.now().toIso8601String()}.csv';
     final dir = await getApplicationDocumentsDirectory();
     final path = '${dir.path}/$fileName';
@@ -254,6 +253,10 @@ class TaskCubit extends Cubit<TaskState> {
     csvCubit = state.context.read<CsvTrackerCubit>();
 
     _controllerSub = controllerCubit.stream.listen((controllerState) {
+      if(controllerState.mFinished) 
+      {
+        csvCubit.state.writeOutData();
+      }
       if(controllerState.mQuestioning)
       {
         objCubit.update();
@@ -267,13 +270,7 @@ class TaskCubit extends Cubit<TaskState> {
         else
         {
           updateData();
-          wait();
-          controllerCubit.updateQuestioning();
         }
-      }
-      if(controllerState.mFinished) 
-      {
-        csvCubit.state.writeOutData();
       }
     });
   }
@@ -295,10 +292,6 @@ class TaskCubit extends Cubit<TaskState> {
         }
       }
     }
-  }
-
-  Future<void> wait() async {
-    await Future.delayed(const Duration(seconds: 2));
   }
 
   void updateData() {
@@ -637,7 +630,7 @@ class InputOnTask extends StatefulWidget {
 
 class _InputOnTaskState extends State<InputOnTask> {
   final FocusNode _focusNode = FocusNode();
-
+  bool _showWait = false;
   @override
   void initState() {
     super.initState();
@@ -659,10 +652,15 @@ class _InputOnTaskState extends State<InputOnTask> {
       focusNode: _focusNode,
       onKeyEvent: (FocusNode node, KeyEvent event) {
         // Check if user pressed SPACE in a KeyDownEvent
-        for(int i = 0; i < 5; i++){
-          if (event is KeyDownEvent && event.logicalKey == keys[i]) {
-            BlocProvider.of<TaskCubit>(context).processKeyEvent(keys[i]);
-            return KeyEventResult.handled;
+        if(BlocProvider.of<TestControllerCubit>(context).state.mQuestioning){
+          for(int i = 0; i < 5; i++){
+            if(!_showWait){
+              if (event is KeyDownEvent && event.logicalKey == keys[i]) {
+                BlocProvider.of<TaskCubit>(context).processKeyEvent(keys[i]);
+                _startTask();
+                return KeyEventResult.handled;
+              }
+            }
           }
         }
         return KeyEventResult.ignored;
@@ -731,6 +729,13 @@ class _InputOnTaskState extends State<InputOnTask> {
         ),
       ),
     );
+  }
+  Future<void> _startTask() async {
+    setState(() => _showWait = true);
+    final controllerCubit = context.read<TestControllerCubit>();
+    await Future.delayed(const Duration(seconds: 2));
+    controllerCubit.updateQuestioning();
+    setState(() => _showWait = false);
   }
 }
 
