@@ -7,6 +7,8 @@ import 'package:time/time.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
+import 'package:equatable/equatable.dart';
+
 
 
 // Global colors and words
@@ -18,7 +20,16 @@ final List<Color> colors = [
   const Color(0xFF9C27B0), // purple
 ];
 final List<String> words = ['Red', 'Blue', 'Green', 'Brown', 'Purple'];
+
 final List<int> types = [0, 1, 2];
+
+final List<LogicalKeyboardKey> keys = [
+  LogicalKeyboardKey.keyA,
+  LogicalKeyboardKey.keyS,
+  LogicalKeyboardKey.keyD,
+  LogicalKeyboardKey.keyF,
+  LogicalKeyboardKey.keyG,
+];
 
 // Make a top-level Random instance
 final Random randy = Random(DateTime.now().millisecondsSinceEpoch);
@@ -56,36 +67,67 @@ class TestObjectCubit extends Cubit<TestObjectState> {
 // ------------------ TestController -----------------------
 class TestController {
   final int mTaskCount;
+  final int mCurrCount;
   final bool mStarted;
   final bool mFinished;
   final bool mCorrect;
+  final bool mStartQuestioning;
   final bool mQuestioning;
+  final DateTime mStartTime;
+  final DateTime mEndTime;
+  final List<int> mKeyBoardLayout;
 
   const TestController(
     this.mTaskCount,
+    this.mCurrCount,
     this.mStarted,
     this.mFinished,
     this.mCorrect,
+    this.mStartQuestioning,
     this.mQuestioning,
+    this.mStartTime,
+    this.mEndTime,
+    this.mKeyBoardLayout
   );
 }
 
 class TestControllerCubit extends Cubit<TestController> {
   TestControllerCubit()
-      : super(const TestController(0, false, false, false, false));
+      : super( TestController(0, 0, false, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
 
+  List<int> generateUniqueRandomInts() {
+    // Create a list with numbers from 0 to 5
+    List<int> numbers = List.generate(5, (index) => index);
+    
+    // Shuffle the list randomly
+    numbers.shuffle(randy);
+    
+    return numbers;
+  }
+  void initKeys() {
+    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, state.mStartQuestioning, state.mQuestioning, state.mStartTime, state.mEndTime, generateUniqueRandomInts()));
+  }
   void initStroop(int cnt) {
-    emit(TestController(cnt, !state.mStarted, state.mFinished, state.mCorrect, state.mQuestioning));
+    emit(TestController(cnt, state.mCurrCount, !state.mStarted, state.mFinished, state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
   void updateFinished() {
-    emit(TestController(state.mTaskCount, state.mStarted, !state.mFinished, state.mCorrect, state.mQuestioning));
+    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, !state.mFinished, state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
   void updateCorrect() {
-    emit(TestController(state.mTaskCount, state.mStarted, state.mFinished, !state.mCorrect, state.mQuestioning));
+    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, !state.mCorrect, state.mQuestioning, state.mStartQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
   void updateQuestioning() {
-    //if(state.mQuestioning == false)
-    emit(TestController(state.mTaskCount, state.mStarted, state.mFinished, state.mCorrect, !state.mQuestioning));
+    if(state.mQuestioning == false)
+    {
+      emit(TestController(state.mTaskCount, state.mCurrCount + 1, state.mStarted, state.mFinished, state.mCorrect, true, !state.mQuestioning, DateTime.now(), state.mEndTime, state.mKeyBoardLayout));
+    }
+    else
+    {
+      emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, state.mStartQuestioning, !state.mQuestioning, state.mStartTime, DateTime.now(), state.mKeyBoardLayout));
+    }
+  }
+  void updateQuestioningStart() {
+    emit(TestController(state.mTaskCount, state.mCurrCount, state.mStarted, state.mFinished, state.mCorrect, false, state.mQuestioning, state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
   }
 }
 
@@ -102,7 +144,7 @@ class CsvTracker {
     this.endTimes,
     this.reactionTimes,
     this.accuracy,
-    this.timeOut,
+    this.timeOut
   );
 
   int boolToInt(bool value) => value ? 1 : 0;
@@ -189,7 +231,9 @@ void main() {
         BlocProvider<TestControllerCubit>(
           create: (context) => TestControllerCubit(),
         ),
-        // Add more BLoCs here if needed
+        BlocProvider<CsvTrackerCubit>(
+          create: (context) => CsvTrackerCubit(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -254,7 +298,7 @@ class MyHomePage extends StatelessWidget {
                             !BlocProvider.of<TestControllerCubit>(context).state.mStarted ? 
                               InputOnStart() : // ADD INPUT WIDGET HERE
                               BlocProvider.of<TestControllerCubit>(context).state.mQuestioning ? 
-                                _buildTestObjectView(state) : 
+                                _buildTestObjectView(state, context) : 
                                 BlocProvider.of<TestControllerCubit>(context).state.mCorrect ?
                                   _responseOutput(true) :
                                   _responseOutput(false),
@@ -277,7 +321,14 @@ class MyHomePage extends StatelessWidget {
     );
   }
   // Helper function to choose which widget to display
-  Widget _buildTestObjectView(TestObjectState state) {
+  Widget _buildTestObjectView(TestObjectState state, BuildContext context) {
+    final  controllerCubit = context.read<TestControllerCubit>();
+    final objControllerCubit = context.read<TestObjectCubit>();
+    if(controllerCubit.state.mStartQuestioning == true)
+    {
+      objControllerCubit.update();
+      controllerCubit.updateQuestioningStart();
+    }
     if (state.mType == 0) {
       return _buildBoxTask(state.mColor);
     } else if (state.mType == 1) {
@@ -375,6 +426,8 @@ class _InputOnStartState extends State<InputOnStart> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+    final controllerCubit = context.read<TestControllerCubit>();
+    controllerCubit.initKeys();
   }
 
   @override
@@ -411,9 +464,9 @@ class _InputOnStartState extends State<InputOnStart> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Use: A(Red), S(Green), D(Blue), F(Purple), G(Brown) Keys \nPress SPACE to start (No Input is 100 trials)', 
-            style: const TextStyle(fontSize: 15)
-          ),
+          SizedBox(height: 10),
+          RevealTextWidget(),
+          SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -421,14 +474,17 @@ class _InputOnStartState extends State<InputOnStart> {
                 height: 50,
                 width: 300,
                 decoration: BoxDecoration(
-                  border: Border.all(width: 2),
+                  color: const Color.fromARGB(255, 176, 106, 130),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.black),
                 ),
                 child: TextField(
                   controller: _tec,
-                  style: const TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center, // This centers the text
+                  style: const TextStyle(fontSize: 17.0),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    hintText: 'Enter number of trials here',
+                    hintText: 'Enter Number of Trials Here',
                     border: InputBorder.none,
                   ),
                 ),
@@ -436,6 +492,17 @@ class _InputOnStartState extends State<InputOnStart> {
               const SizedBox(width: 8),
             ],
           ),
+          Text('100 Trials if left blank', 
+            style: const TextStyle(fontSize: 15)
+          ),
+          SizedBox(height: 50),
+          Text('Press the Spacebar to Start', 
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold
+            )
+          ),
+          SizedBox(height: 80),
         ],
       ),
     );
@@ -460,5 +527,69 @@ class _InputOnStartState extends State<InputOnStart> {
    controllerCubit.updateQuestioning();
     // Return to the input form (or navigate, based on your app logic)
     setState(() => _showWait = false);
+  }
+}
+
+class RevealTextWidget extends StatefulWidget {
+  const RevealTextWidget({super.key});
+
+  @override
+  RevealTextWidgetState createState() => RevealTextWidgetState();
+}
+
+class RevealTextWidgetState extends State<RevealTextWidget> {
+  bool _isRevealed = false;
+
+  void _toggleReveal() {
+    setState(() {
+      _isRevealed = !_isRevealed;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _toggleReveal,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 79, 113, 173),
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(color: Colors.black),
+        ),
+        child: Center(
+          child: ColoredTextExample(colored: _isRevealed),
+        ),
+      ),
+    );
+  }
+}
+
+class ColoredTextExample extends StatelessWidget {
+  final bool colored;
+
+  const ColoredTextExample({super.key, required this.colored});
+
+  @override
+  Widget build(BuildContext context) {
+    final controllerCubit = context.read<TestControllerCubit>();
+    if (colored) {
+      return RichText(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18.0),
+          children: List.generate(5, (index) {
+            return TextSpan(
+              text: '${keys[controllerCubit.state.mKeyBoardLayout[index]].debugName}: ${words[index]}\n',
+              style: TextStyle(color: colors[index], fontWeight: FontWeight.bold, fontSize: 18.0),
+            );
+          }),
+        ),
+      );
+    } else {
+      return const Text(
+        'Click to Reveal Randomized Keyboard Inputs',
+        style: TextStyle(fontSize: 17.0),
+      );
+    }
   }
 }
