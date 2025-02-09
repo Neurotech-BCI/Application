@@ -76,6 +76,7 @@ class TestController {
   final DateTime mStartTime;
   final DateTime mEndTime;
   final List<int> mKeyBoardLayout;
+  final bool mDatabit;
 
   const TestController(
     this.mTaskCount,
@@ -86,13 +87,14 @@ class TestController {
     this.mQuestioning,
     this.mStartTime,
     this.mEndTime,
-    this.mKeyBoardLayout
+    this.mKeyBoardLayout,
+    this.mDatabit
   );
 }
 
 class TestControllerCubit extends Cubit<TestController> {
   TestControllerCubit()
-      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), [0, 1, 2, 3, 4]));
+      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), [0, 1, 2, 3, 4], false));
 
   List<int> generateUniqueRandomInts() {
     List<int> numbers = List.generate(5, (index) => index);
@@ -103,44 +105,54 @@ class TestControllerCubit extends Cubit<TestController> {
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, state.mCorrect, 
     state.mQuestioning, state.mStartTime, 
-    state.mEndTime, generateUniqueRandomInts()));
+    state.mEndTime, generateUniqueRandomInts(), state.mDatabit));
   }
-  void initStroop(int cnt) {
-    print("CONTROLLER: INIT STROOP");
+  void initStroop(int cnt, bool setBit) {
     emit(TestController(cnt, state.mCurrCount, 
     !state.mStarted, state.mFinished, state.mCorrect,
     state.mQuestioning, state.mStartTime, 
-    state.mEndTime, state.mKeyBoardLayout));
+    state.mEndTime, state.mKeyBoardLayout, setBit));
   }
   void updateFinished() {
-    print("CONTROLLER: FINISHED ON");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, true, state.mCorrect, 
      true, state.mStartTime, 
-     state.mEndTime, state.mKeyBoardLayout));
+     state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
   }
   void updateCorrect(bool correct) {
-    print("CONTROLLER: UPDATECORRECT");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, correct, state.mQuestioning, 
-    state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
+    state.mStartTime, state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
   }
   void updateQuestioning() {
-    if(state.mQuestioning == false)
+    if(!state.mFinished)
     {
-      print("CONTROLLER: QUESTIONING ON");
-      emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
-      state.mStarted, state.mFinished, state.mCorrect, 
-      !state.mQuestioning, DateTime.now(),
-      state.mEndTime, state.mKeyBoardLayout));
+      if(state.mQuestioning == false)
+      {
+        emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
+        state.mStarted, state.mFinished, state.mCorrect, 
+        !state.mQuestioning, DateTime.now(),
+        state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
+      }
+      else
+      {
+        emit(TestController(state.mTaskCount, state.mCurrCount,
+          state.mStarted, state.mFinished, state.mCorrect,
+          !state.mQuestioning, state.mStartTime, 
+          DateTime.now(), state.mKeyBoardLayout, state.mDatabit));
+      }
     }
-    else
-    {
-      print("CONTROLLER: QUESTIONING OFF");
-      emit(TestController(state.mTaskCount, state.mCurrCount,
-        state.mStarted, state.mFinished, state.mCorrect,
-        !state.mQuestioning, state.mStartTime, 
-        DateTime.now(), state.mKeyBoardLayout));
+  }
+
+
+  Future<void> startQuestion() async {
+    int currentQuestion = state.mCurrCount;
+    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    if(state.mQuestioning && currentQuestion == state.mCurrCount && !state.mFinished){
+      updateCorrect(false);
+      updateQuestioning();
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+      updateQuestioning();
     }
   }
 }
@@ -285,6 +297,7 @@ class TaskCubit extends Cubit<TaskState> {
   late CsvTrackerCubit csvCubit;
 
   StreamSubscription<TestController>? _controllerSub;
+  bool questionOn = false;
 
   void init() {
     controllerCubit = state.context.read<TestControllerCubit>();
@@ -295,14 +308,19 @@ class TaskCubit extends Cubit<TaskState> {
     _controllerSub = controllerCubit.stream.listen((controllerState) {
       if(controllerState.mFinished) 
       {
-        if(outputted == false ){
-          csvCubit.state.writeOutData();
+        if(outputted == false)
+        {
+          if(controllerState.mDatabit)
+          {
+            csvCubit.state.writeOutData();
+          }
           outputted = true;
         }
       }
       else if(controllerState.mQuestioning)
       {
         objCubit.update();
+        controllerCubit.startQuestion();
       }
       else if (!controllerState.mQuestioning) 
       {
@@ -503,7 +521,8 @@ class InputOnStart extends StatefulWidget {
 }
 
 class _InputOnStartState extends State<InputOnStart> {
-  final TextEditingController _tec = TextEditingController();
+  final TextEditingController _numtec = TextEditingController();
+  final TextEditingController _codetec = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _showWait = false;
   int counter = 3;
@@ -520,7 +539,8 @@ class _InputOnStartState extends State<InputOnStart> {
   @override
   void dispose() {
     _focusNode.dispose();
-    _tec.dispose();
+    _numtec.dispose();
+    _codetec.dispose();
     super.dispose();
   }
 
@@ -564,7 +584,7 @@ class _InputOnStartState extends State<InputOnStart> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: 50,
+                height: 30,
                 width: 300,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 255, 255, 255),
@@ -572,9 +592,9 @@ class _InputOnStartState extends State<InputOnStart> {
                   border: Border.all(color: Colors.black),
                 ),
                 child: TextField(
-                  controller: _tec,
+                  controller: _numtec,
                   textAlign: TextAlign.center, // This centers the text
-                  style: const TextStyle(fontSize: 17.0),
+                  style: const TextStyle(fontSize: 15.0),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     hintText: 'Enter Number of Trials Here',
@@ -582,7 +602,31 @@ class _InputOnStartState extends State<InputOnStart> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 30,
+                width: 300,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: TextField(
+                  controller: _codetec,
+                  textAlign: TextAlign.center, // This centers the text
+                  style: const TextStyle(fontSize: 15.0),
+                  keyboardType: TextInputType.text,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter Data Code',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
             ],
           ),
           SizedBox(height: 50),
@@ -620,7 +664,8 @@ class _InputOnStartState extends State<InputOnStart> {
   Future<void> _startTask() async {
     setState(() => _showWait = true);
     // Parse the text as an integer (default to 100 if invalid)
-    final enteredNumber = int.tryParse(_tec.text) ?? 100;
+    final enteredNumber = int.tryParse(_numtec.text) ?? 100;
+    final String enteredCode = _codetec.text.trim();
     final controllerCubit = context.read<TestControllerCubit>();
     // Wait 3 seconds
     await Future.delayed(const Duration(seconds: 1));
@@ -629,7 +674,11 @@ class _InputOnStartState extends State<InputOnStart> {
     setState(() => counter--);
     await Future.delayed(const Duration(seconds: 1));
     setState(() => counter--);
-    controllerCubit.initStroop(enteredNumber);
+    if(enteredCode == "FATIGUE"){
+      controllerCubit.initStroop(enteredNumber, true);
+    } else {
+      controllerCubit.initStroop(enteredNumber, false);
+    }
     controllerCubit.updateQuestioning();
     // Return to the input form (or navigate, based on your app logic)
     setState(() => _showWait = false);
@@ -789,7 +838,7 @@ class _InputOnTaskState extends State<InputOnTask> {
   Future<void> _startTask() async {
     setState(() => _showWait = true);
     final controllerCubit = context.read<TestControllerCubit>();
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
     controllerCubit.updateQuestioning();
     setState(() => _showWait = false);
   }
