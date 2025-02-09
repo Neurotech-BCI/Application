@@ -7,6 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
+import 'dart:convert'; // For json.decode and utf8.encode
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis_auth/auth_io.dart';  // <-- Import here
 
 // Global colors and words
 final List<Color> colors = [
@@ -122,7 +125,6 @@ class TestControllerCubit extends Cubit<TestController> {
   void updateQuestioning() {
     if(state.mQuestioning == false)
     {
-      print('${state.mCurrCount}, ${state.mTaskCount}');
       emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
       state.mStarted, state.mFinished, state.mCorrect, 
       !state.mQuestioning, DateTime.now(),
@@ -135,6 +137,49 @@ class TestControllerCubit extends Cubit<TestController> {
         !state.mQuestioning, state.mStartTime, 
         DateTime.now(), state.mKeyBoardLayout));
     }
+  }
+}
+
+// ------------------ GOOGLE AUTH -----------------------
+/// Loads the service account credentials from an asset file.
+Future<ServiceAccountCredentials> _loadServiceAccountCredentials() async {
+  final jsonString = await rootBundle.loadString('assets/credential.json');
+  final credentialsMap = json.decode(jsonString);
+  return ServiceAccountCredentials.fromJson(credentialsMap);
+}
+
+/// Returns an authenticated instance of the Drive API.
+Future<drive.DriveApi> getDriveApi() async {
+  try {
+    final credentials = await _loadServiceAccountCredentials();
+    final scopes = [drive.DriveApi.driveFileScope];
+    final client = await clientViaServiceAccount(credentials, scopes);
+    return drive.DriveApi(client);
+  } catch (e) {
+    rethrow;
+  }
+}
+
+/// Example function to upload a file to Google Drive.
+Future<void> uploadFileToDrive(String csvContent, String fileName) async {
+  try {
+    final driveApi = await getDriveApi();
+    final csvBytes = utf8.encode(csvContent);
+    final driveFile = drive.File()
+      ..name = fileName
+      ..parents = ['19KE2jfHlKZyJSdk4WVf3-k9aOEMXUC6-'];
+    final media = drive.Media(
+      Stream.fromIterable([csvBytes]),
+      csvBytes.length,
+      contentType: 'text/csv',
+    );
+    final result = await driveApi.files.create(
+      driveFile,
+      uploadMedia: media,
+    );
+    print('File uploaded: ${result.name} (ID: ${result.id})');
+  } catch (e) {
+    print('An error occurred during file upload: $e');
   }
 }
 
@@ -188,12 +233,8 @@ class CsvTracker {
   void writeOutData() async {
     final csvData = toCsvString();
     final fileName = 'stroop_test_${DateTime.now().toIso8601String()}.csv';
-    final dir = await getApplicationDocumentsDirectory();
-    final path = '${dir.path}/$fileName';
-    final file = File(path);
-    await file.writeAsString(csvData);
+    await uploadFileToDrive(csvData, fileName);
   }
-
 }
 
 class CsvTrackerCubit extends Cubit<CsvTracker> {
@@ -244,21 +285,21 @@ class TaskCubit extends Cubit<TaskState> {
     controllerCubit = state.context.read<TestControllerCubit>();
     objCubit = state.context.read<TestObjectCubit>();
     csvCubit = state.context.read<CsvTrackerCubit>();
+    bool outputted = false;
 
     _controllerSub = controllerCubit.stream.listen((controllerState) {
-      if (controllerState.mCurrCount == controllerState.mTaskCount) 
-      {
-        controllerCubit.updateQuestioning();
-      }
       if(controllerState.mFinished) 
       {
-        csvCubit.state.writeOutData();
+        if(outputted == false ){
+          csvCubit.state.writeOutData();
+          outputted = true;
+        }
       }
-      if(controllerState.mQuestioning)
+      else if(controllerState.mQuestioning)
       {
         objCubit.update();
       }
-      if (!controllerState.mQuestioning) 
+      else if (!controllerState.mQuestioning) 
       {
         if (controllerState.mCurrCount > controllerState.mTaskCount) 
         {
@@ -268,6 +309,10 @@ class TaskCubit extends Cubit<TaskState> {
         {
           updateData();
         }
+      }
+      else if (controllerState.mCurrCount == controllerState.mTaskCount) 
+      {
+        controllerCubit.updateQuestioning();
       }
     });
   }

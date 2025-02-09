@@ -7,9 +7,9 @@
 
 ## Team
 
-| [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Derick.jpeg" width="80" height="80" style="border-radius: 50%;" />][Derick-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
+| [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="Assets/Derick.jpeg" width="80" height="80" style="border-radius: 50%;" />][Derick-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
 |:---:|:---:|:---:|:---:|
-| **[Yaoyue Wang][Yaoyue-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Asher Holtham][Asher-Contact]**<br>![Development](https://img.shields.io/badge/-Development-2F3C7E?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
+| **[Asher Holtham][Asher-Contact]**<br>![Development](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Backend-2F3C7E?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Flutter-url]: https://flutter.dev/
