@@ -35,127 +35,6 @@ final Random randy = Random(DateTime.now().millisecondsSinceEpoch);
 
 final String testStamp = DateTime.now().toIso8601String();
 
-// ------------------ TestObject --------------------------
-class TestObjectState {
-  final Color mColor;
-  final String mWord;
-  final int mType;
-
-  const TestObjectState(this.mColor, this.mWord, this.mType);
-}
-
-class TestObjectCubit extends Cubit<TestObjectState> {
-  TestObjectCubit() : super(TestObjectState(colors[randy.nextInt(colors.length)], words[randy.nextInt(words.length)], randy.nextInt(types.length)));
-
-  void update() {
-    final sequence = _generateRandomSequence();
-    emit(
-      TestObjectState(
-        colors[sequence[0]],
-        words[sequence[1]],
-        sequence[2],
-      ),
-    );
-  }
-
-  List<int> _generateRandomSequence() => [
-        randy.nextInt(colors.length),
-        randy.nextInt(words.length),
-        randy.nextInt(types.length),
-      ];
-}
-
-// ------------------ TestController -----------------------
-class TestController {
-  final int mTaskCount;
-  final int mCurrCount;
-  final bool mStarted;
-  final bool mFinished;
-  final bool mCorrect;
-  final bool mQuestioning;
-  final DateTime mStartTime;
-  final DateTime mEndTime;
-  final List<int> mKeyBoardLayout;
-  final bool mDatabit;
-
-  const TestController(
-    this.mTaskCount,
-    this.mCurrCount,
-    this.mStarted,
-    this.mFinished,
-    this.mCorrect,
-    this.mQuestioning,
-    this.mStartTime,
-    this.mEndTime,
-    this.mKeyBoardLayout,
-    this.mDatabit
-  );
-}
-
-class TestControllerCubit extends Cubit<TestController> {
-  TestControllerCubit()
-      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), [0, 1, 2, 3, 4], false));
-
-  List<int> generateUniqueRandomInts() {
-    List<int> numbers = List.generate(5, (index) => index);
-    numbers.shuffle(randy);
-    return numbers;
-  }
-  void initKeys() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, 
-    state.mStarted, state.mFinished, state.mCorrect, 
-    state.mQuestioning, state.mStartTime, 
-    state.mEndTime, generateUniqueRandomInts(), state.mDatabit));
-  }
-  void initStroop(int cnt, bool setBit) {
-    emit(TestController(cnt, state.mCurrCount, 
-    !state.mStarted, state.mFinished, state.mCorrect,
-    state.mQuestioning, state.mStartTime, 
-    state.mEndTime, state.mKeyBoardLayout, setBit));
-  }
-  void updateFinished() {
-    emit(TestController(state.mTaskCount, state.mCurrCount, 
-    state.mStarted, true, state.mCorrect, 
-     true, state.mStartTime, 
-     state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
-  }
-  void updateCorrect(bool correct) {
-    emit(TestController(state.mTaskCount, state.mCurrCount, 
-    state.mStarted, state.mFinished, correct, state.mQuestioning, 
-    state.mStartTime, state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
-  }
-  void updateQuestioning() {
-    if(!state.mFinished)
-    {
-      if(state.mQuestioning == false)
-      {
-        emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
-        state.mStarted, state.mFinished, state.mCorrect, 
-        !state.mQuestioning, DateTime.now(),
-        state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
-      }
-      else
-      {
-        emit(TestController(state.mTaskCount, state.mCurrCount,
-          state.mStarted, state.mFinished, state.mCorrect,
-          !state.mQuestioning, state.mStartTime, 
-          DateTime.now(), state.mKeyBoardLayout, state.mDatabit));
-      }
-    }
-  }
-
-
-  Future<void> startQuestion() async {
-    int currentQuestion = state.mCurrCount;
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-    if(state.mQuestioning && currentQuestion == state.mCurrCount && !state.mFinished){
-      updateCorrect(false);
-      updateQuestioning();
-      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-      updateQuestioning();
-    }
-  }
-}
 
 // ------------------ GOOGLE AUTH -----------------------
 /// Loads the service account credentials from an asset file.
@@ -284,6 +163,129 @@ class CsvTrackerCubit extends Cubit<CsvTracker> {
     }
   }
 }
+
+// ------------------ TestObject --------------------------
+class TestObjectState {
+  final Color mColor;
+  final String mWord;
+  final int mType;
+
+  const TestObjectState(this.mColor, this.mWord, this.mType);
+}
+
+class TestObjectCubit extends Cubit<TestObjectState> {
+  TestObjectCubit() : super(TestObjectState(colors[randy.nextInt(colors.length)], words[randy.nextInt(words.length)], randy.nextInt(types.length)));
+
+  void update() {
+    final sequence = _generateRandomSequence();
+    emit(
+      TestObjectState(
+        colors[sequence[0]],
+        words[sequence[1]],
+        sequence[2],
+      ),
+    );
+  }
+
+  List<int> _generateRandomSequence() => [
+        randy.nextInt(colors.length),
+        randy.nextInt(words.length),
+        randy.nextInt(types.length),
+      ];
+}
+
+// ------------------ TestController -----------------------
+class TestController {
+  final int mTaskCount;
+  final int mCurrCount;
+  final bool mStarted;
+  final bool mFinished;
+  final bool mCorrect;
+  final bool mQuestioning;
+  final DateTime mStartTime;
+  final DateTime mEndTime;
+  final List<int> mKeyBoardLayout;
+  final bool mDatabit;
+
+  const TestController(
+    this.mTaskCount,
+    this.mCurrCount,
+    this.mStarted,
+    this.mFinished,
+    this.mCorrect,
+    this.mQuestioning,
+    this.mStartTime,
+    this.mEndTime,
+    this.mKeyBoardLayout,
+    this.mDatabit
+  );
+}
+
+class TestControllerCubit extends Cubit<TestController> {
+  TestControllerCubit()
+      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), [0, 1, 2, 3, 4], false));
+
+  List<int> generateUniqueRandomInts() {
+    List<int> numbers = List.generate(5, (index) => index);
+    numbers.shuffle(randy);
+    return numbers;
+  }
+  void initKeys() {
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, state.mFinished, state.mCorrect, 
+    state.mQuestioning, state.mStartTime, 
+    state.mEndTime, generateUniqueRandomInts(), state.mDatabit));
+  }
+  void initStroop(int cnt, bool setBit) {
+    emit(TestController(cnt, state.mCurrCount, 
+    !state.mStarted, state.mFinished, state.mCorrect,
+    state.mQuestioning, state.mStartTime, 
+    state.mEndTime, state.mKeyBoardLayout, setBit));
+  }
+  void updateFinished() {
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, true, state.mCorrect, 
+     true, state.mStartTime, 
+     state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
+  }
+  void updateCorrect(bool correct) {
+    emit(TestController(state.mTaskCount, state.mCurrCount, 
+    state.mStarted, state.mFinished, correct, state.mQuestioning, 
+    state.mStartTime, state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
+  }
+  void updateQuestioning() {
+    if(!state.mFinished)
+    {
+      if(state.mQuestioning == false)
+      {
+        emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
+        state.mStarted, state.mFinished, state.mCorrect, 
+        !state.mQuestioning, DateTime.now(),
+        state.mEndTime, state.mKeyBoardLayout, state.mDatabit));
+      }
+      else
+      {
+        emit(TestController(state.mTaskCount, state.mCurrCount,
+          state.mStarted, state.mFinished, state.mCorrect,
+          !state.mQuestioning, state.mStartTime, 
+          DateTime.now(), state.mKeyBoardLayout, state.mDatabit));
+      }
+    }
+  }
+
+
+  Future<void> startQuestion() async {
+    int currentQuestion = state.mCurrCount;
+    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    if(state.mQuestioning && currentQuestion == state.mCurrCount && !state.mFinished){
+      updateCorrect(false);
+      updateQuestioning();
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+      updateQuestioning();
+    }
+  }
+}
+
 
 class TaskState{
   final BuildContext context;
