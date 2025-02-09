@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
-import 'dart:io';
 import 'dart:convert'; // For json.decode and utf8.encode
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis_auth/auth_io.dart';  // <-- Import here
@@ -34,6 +32,8 @@ final List<LogicalKeyboardKey> keys = [
 final List<String> keyStrings = ['keyA', 'keyS', 'keyD', 'keyF', 'keyG'];
 // Make a top-level Random instance
 final Random randy = Random(DateTime.now().millisecondsSinceEpoch);
+
+final String testStamp = DateTime.now().toIso8601String();
 
 // ------------------ TestObject --------------------------
 class TestObjectState {
@@ -92,7 +92,7 @@ class TestController {
 
 class TestControllerCubit extends Cubit<TestController> {
   TestControllerCubit()
-      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), []));
+      : super( TestController(100, 0, false, false, false, false, DateTime.utc(1970, 1, 1), DateTime.utc(1970, 1, 1), [0, 1, 2, 3, 4]));
 
   List<int> generateUniqueRandomInts() {
     List<int> numbers = List.generate(5, (index) => index);
@@ -106,18 +106,21 @@ class TestControllerCubit extends Cubit<TestController> {
     state.mEndTime, generateUniqueRandomInts()));
   }
   void initStroop(int cnt) {
+    print("CONTROLLER: INIT STROOP");
     emit(TestController(cnt, state.mCurrCount, 
     !state.mStarted, state.mFinished, state.mCorrect,
     state.mQuestioning, state.mStartTime, 
     state.mEndTime, state.mKeyBoardLayout));
   }
   void updateFinished() {
+    print("CONTROLLER: FINISHED ON");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, true, state.mCorrect, 
      true, state.mStartTime, 
      state.mEndTime, state.mKeyBoardLayout));
   }
   void updateCorrect(bool correct) {
+    print("CONTROLLER: UPDATECORRECT");
     emit(TestController(state.mTaskCount, state.mCurrCount, 
     state.mStarted, state.mFinished, correct, state.mQuestioning, 
     state.mStartTime, state.mEndTime, state.mKeyBoardLayout));
@@ -125,6 +128,7 @@ class TestControllerCubit extends Cubit<TestController> {
   void updateQuestioning() {
     if(state.mQuestioning == false)
     {
+      print("CONTROLLER: QUESTIONING ON");
       emit(TestController(state.mTaskCount, state.mCurrCount + 1, 
       state.mStarted, state.mFinished, state.mCorrect, 
       !state.mQuestioning, DateTime.now(),
@@ -132,6 +136,7 @@ class TestControllerCubit extends Cubit<TestController> {
     }
     else
     {
+      print("CONTROLLER: QUESTIONING OFF");
       emit(TestController(state.mTaskCount, state.mCurrCount,
         state.mStarted, state.mFinished, state.mCorrect,
         !state.mQuestioning, state.mStartTime, 
@@ -232,7 +237,7 @@ class CsvTracker {
 
   void writeOutData() async {
     final csvData = toCsvString();
-    final fileName = 'stroop_test_${DateTime.now().toIso8601String()}.csv';
+    final fileName = 'stroop_test_$testStamp.csv';
     await uploadFileToDrive(csvData, fileName);
   }
 }
@@ -301,8 +306,9 @@ class TaskCubit extends Cubit<TaskState> {
       }
       else if (!controllerState.mQuestioning) 
       {
-        if (controllerState.mCurrCount > controllerState.mTaskCount) 
+        if (controllerState.mCurrCount >= controllerState.mTaskCount) 
         {
+          updateData();
           controllerCubit.updateFinished();
         } 
         else
@@ -395,15 +401,16 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor:   const Color.fromARGB(255, 191, 208, 220),
+        backgroundColor: const Color.fromARGB(255, 191, 208, 220),
         centerTitle: true,
+        // Add the logo in the leading property
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('Stroop Task Program'),
-            Text(
+            const Text(
               'Neurotech USC BCI Project 2025',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -446,54 +453,44 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
- 
-  Future<Directory> getDirectory() async {
-        final dir = await getApplicationDocumentsDirectory();
-        return dir;
-  }
+
  
   Widget _endOutput() {
-    return FutureBuilder<Directory>(
-      future: getDirectory(), // The asynchronous function to wait for.
-      builder: (
-        BuildContext context, 
-        AsyncSnapshot<Directory> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // While the future is loading, show a loading indicator.
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          // If the future returns an error, display the error.
-          return Text(
-            'Error: ${snapshot.error}',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 17,
-              color: Color.fromARGB(255, 30, 204, 186),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Tests Finished!',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 60,
+                color: Color.fromARGB(255, 30, 204, 186),
+              ),
             ),
-          );
-        } else if (snapshot.hasData) {
-          // Once the future completes, you have the directory.
-          final Directory dir = snapshot.data!;
-          return Text(
-            'Tests Finished! \n \n Directory path: \n ${dir.path}',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Color.fromARGB(255, 30, 204, 186),
+            SizedBox(height: 30),
+            Text(
+              'Data saved to:',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 25,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
             ),
-          );
-        } else {
-          // In case no data is returned.
-          return const Text(
-            'No directory found',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 17,
-              color: Color.fromARGB(255, 30, 204, 186),
+            SizedBox(height: 12),
+            Text(
+              'stroop_test_$testStamp.csv',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 25,
+                color: Color.fromARGB(255, 30, 204, 186),
+              ),
             ),
-          );
-        }
-      },
+          ]
+        )
+      ]
     );
   }
 }
@@ -518,8 +515,6 @@ class _InputOnStartState extends State<InputOnStart> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
-    final controllerCubit = context.read<TestControllerCubit>();
-    controllerCubit.initKeys();
   }
 
   @override
@@ -531,6 +526,7 @@ class _InputOnStartState extends State<InputOnStart> {
 
   @override
   Widget build(BuildContext context) {
+    final controllerCubit = context.read<TestControllerCubit>();
     // If waiting, just show "Wait..." text
     if (_showWait) {
       return Center(
@@ -556,25 +552,14 @@ class _InputOnStartState extends State<InputOnStart> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            height: 50,
-            width: 300,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(112, 135, 119, 125),
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.black),
-            ),
-            child: 
-              Text('Press the Spacebar to Start', 
-              textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                ),
-              )
+          Text('Base number of trials is 100', 
+            textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
           ),
           SizedBox(height: 30),
-          RevealTextWidget(),
-          SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -582,7 +567,7 @@ class _InputOnStartState extends State<InputOnStart> {
                 height: 50,
                 width: 300,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 188, 174, 179),
+                  color: const Color.fromARGB(255, 255, 255, 255),
                   borderRadius: BorderRadius.circular(8.0),
                   border: Border.all(color: Colors.black),
                 ),
@@ -600,10 +585,33 @@ class _InputOnStartState extends State<InputOnStart> {
               const SizedBox(width: 8),
             ],
           ),
-          Text('100 Trials if left blank', 
-            style: const TextStyle(fontSize: 15)
-          ),
           SizedBox(height: 50),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:             
+                List.generate(5, (index) {
+                  return Text(
+                    '${keyStrings[controllerCubit.state.mKeyBoardLayout[index]]}: ${words[index]}',
+                    style: TextStyle(color: colors[index], fontWeight: FontWeight.bold, fontSize: 18.0),
+                    );
+                  }
+                ),
+              ),  
+            ], 
+          ),
+          SizedBox(height: 30),
+          RandomKeysWidget(),
+          SizedBox(height: 20),
+          Text('Press the Spacebar to Start', 
+            textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 25,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+          ),
         ],
       ),
     );
@@ -628,19 +636,21 @@ class _InputOnStartState extends State<InputOnStart> {
   }
 }
 
-class RevealTextWidget extends StatefulWidget {
-  const RevealTextWidget({super.key});
+class RandomKeysWidget extends StatefulWidget {
+  const RandomKeysWidget({super.key});
 
   @override
-  RevealTextWidgetState createState() => RevealTextWidgetState();
+  RandomKeysWidgetState createState() => RandomKeysWidgetState();
 }
 
-class RevealTextWidgetState extends State<RevealTextWidget> {
+class RandomKeysWidgetState extends State<RandomKeysWidget> {
   bool _isRevealed = false;
 
   void _toggleReveal() {
     setState(() {
       _isRevealed = !_isRevealed;
+      final controllerCubit = context.read<TestControllerCubit>();
+      controllerCubit.initKeys();
     });
   }
 
@@ -651,46 +661,21 @@ class RevealTextWidgetState extends State<RevealTextWidget> {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 79, 113, 173),
+          color: const Color.fromARGB(255, 255, 255, 255),
           borderRadius: BorderRadius.circular(8.0),
           border: Border.all(color: Colors.black),
         ),
         child: Center(
-          child: ColoredTextExample(colored: _isRevealed),
+          child: Text(
+            'Click to Randomized Keyboard Inputs',
+            style: TextStyle(fontSize: 17.0),
+          )
         ),
       ),
     );
   }
 }
 
-class ColoredTextExample extends StatelessWidget {
-  final bool colored;
-
-  const ColoredTextExample({super.key, required this.colored});
-
-  @override
-  Widget build(BuildContext context) {
-    final controllerCubit = context.read<TestControllerCubit>();
-    if (colored) {
-      return RichText(
-        text: TextSpan(
-          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18.0),
-          children: List.generate(5, (index) {
-            return TextSpan(
-              text: '${keyStrings[controllerCubit.state.mKeyBoardLayout[index]]}: ${words[index]}\n',
-              style: TextStyle(color: colors[index], fontWeight: FontWeight.bold, fontSize: 18.0),
-            );
-          }),
-        ),
-      );
-    } else {
-      return const Text(
-        'Click to Reveal Randomized Keyboard Inputs',
-        style: TextStyle(fontSize: 17.0),
-      );
-    }
-  }
-}
 
 class InputOnTask extends StatefulWidget {
   const InputOnTask({super.key});
@@ -809,4 +794,3 @@ class _InputOnTaskState extends State<InputOnTask> {
     setState(() => _showWait = false);
   }
 }
-
