@@ -1,8 +1,19 @@
 [package]
-name = "backend"
+name = "drive_upload_server"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix = "0.13.5"
-actix-web = "4.9.0"
+actix-web = "4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+google-drive3 = "2.0.10"
+yup-oauth2 = "5"
+hyper = "0.14"
+# Use the version google-drive3 is using
+hyper-rustls = "0.22.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+# Force the mime version to match google-drive3’s dependency.
+mime = "0.2.6"
+
+
