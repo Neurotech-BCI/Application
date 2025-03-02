@@ -111,13 +111,13 @@ Future<void> uploadFileToDrive(String csvContent, String fileName) async {
       csvBytes.length,
       contentType: 'text/csv',
     );
-    final result = await driveApi.files.create(
+    await driveApi.files.create(
       driveFile,
       uploadMedia: media,
     );
-    print('File uploaded: ${result.name} (ID: ${result.id})');
+    //print('File uploaded: ${result.name} (ID: ${result.id})');
   } catch (e) {
-    print('An error occurred during file upload: $e');
+    //print('An error occurred during file upload: $e');
   }
 }
 

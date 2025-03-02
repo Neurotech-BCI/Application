@@ -1,14 +1,14 @@
-import 'stroopApp.dart';
+import 'stroop_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animations/animations.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MainApplication());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApplication extends StatelessWidget {
+  const MainApplication({super.key});
 
   @override
   Widget build(BuildContext context) {
