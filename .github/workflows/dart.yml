@@ -2,7 +2,7 @@
 # Dart CI/CD Workflow for GitHub Actions
 # Asher Holtham, Mar 2, 2025
 
-name: Dart
+name: Flutter
 
 on:
   push:
@@ -17,16 +17,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "stable"
 
       - name: Install dependencies
         working-directory: stroop
-        run: dart pub get
+        run: flutter pub get
 
       - name: Analyze project source
         working-directory: stroop
-        run: dart analyze
+        run: flutter analyze
 
       - name: Run tests
         working-directory: stroop
-        run: dart test
+        run: flutter test
