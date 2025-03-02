@@ -34,10 +34,10 @@ class MainPageState extends State<MainPage> {
         body: Stack(
       children: [
         Positioned.fill(
-          child: SvgPicture.asset('assets/ApplicationBackground.svg',
+          child: SvgPicture.asset('svg_assets/ApplicationBackground.svg',
               fit: BoxFit.cover),
         ),
-        Center(child: SvgPicture.asset('assets/LogoCard.svg')),
+        Center(child: SvgPicture.asset('svg_assets/LogoCard.svg')),
         Container(
           alignment: Alignment.bottomCenter,
           child: SizedBox(
