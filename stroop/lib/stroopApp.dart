@@ -77,6 +77,8 @@ final Random randy = Random(DateTime.now().millisecondsSinceEpoch);
 final String testStamp = DateTime.now().toIso8601String();
 
 // ------------------ GOOGLE AUTH -----------------------
+// TODO: VIRTUALIZE THIS PROCESS, SEND CSV TO SERVER
+/// Represents the service account credentials used to authenticate with Google APIs.
 /// Loads the service account credentials from an asset file.
 Future<ServiceAccountCredentials> _loadServiceAccountCredentials() async {
   final jsonString = await rootBundle.loadString('assets/credential.json');
