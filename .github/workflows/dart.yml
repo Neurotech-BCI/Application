@@ -19,8 +19,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.10.6"
-          channel: "stable"
+          channel: master # Use the master channel for a newer Flutter version with Dart >= 3.6.1
 
       - name: Install dependencies
         working-directory: stroop
