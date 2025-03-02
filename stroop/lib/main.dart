@@ -4,11 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animations/animations.dart';
 
 void main() {
-  runApp(const MainApplication());
+  runApp(const MyApp());
 }
 
-class MainApplication extends StatelessWidget {
-  const MainApplication({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
