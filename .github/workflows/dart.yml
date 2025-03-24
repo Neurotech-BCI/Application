@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # self hosted runner is nixos
 
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +22,13 @@ jobs:
           channel: master # Use the master channel for a newer Flutter version with Dart >= 3.6.1
 
       - name: Install dependencies
-        working-directory: frontend/stroop
+        working-directory: frontend
         run: flutter pub get
 
       - name: Analyze project source
-        working-directory: stroop
+        working-directory: frontend
         run: flutter analyze
 
       - name: Run tests
-        working-directory: stroop
+        working-directory: frontend
         run: flutter test
