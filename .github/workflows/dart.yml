@@ -22,7 +22,7 @@ jobs:
           channel: master # Use the master channel for a newer Flutter version with Dart >= 3.6.1
 
       - name: Install dependencies
-        working-directory: stroop
+        working-directory: frontend/stroop
         run: flutter pub get
 
       - name: Analyze project source
