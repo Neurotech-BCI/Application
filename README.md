@@ -2,7 +2,7 @@
 
 ## Tech Stack
 
-- [![Ubuntu][Ubuntu.dev]][Ubuntu-url]
+- [![Nixos][Nixos.dev]][Nixos-url]
 - [![Nginx][Nginx.dev]][Nginx-url]
 - [![Actix][Actix.dev]][Actix-url]
 - [![Flutter][Flutter.dev]][Flutter-url]
@@ -15,8 +15,8 @@
 | **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Backend](https://img.shields.io/badge/-Backend-2F3C7E?style=flat-square) | **[Olivia Liau][Olivia-Contact]**<br>![Frontend](https://img.shields.io/badge/-Frontend-7A2048?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[Ubuntu-url]: https://ubuntu.com/
-[Ubuntu.dev]: https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white
+[Nixos-url]: https://nixos.org/
+[Nixos.dev]: https://img.shields.io/badge/NixOS-4C7AA0?style=for-the-badge&logo=nixos&logoColor=white
 
 [Nginx-url]: https://nginx.org/
 [Nginx.dev]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white
