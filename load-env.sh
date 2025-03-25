@@ -9,4 +9,4 @@ else
 fi
 
 # return our ip addr env variable
-echo "$IP_ADDRESS"
+echo "$APP_IP_ADDRESS"
