@@ -3,22 +3,23 @@
 ## Tech Stack
 
 - [![Apline][Alpine.dev]][Alpine-url]
+- [![Docker][Docker.dev]][Docker-url]
 - [![Nginx][Nginx.dev]][Nginx-url]
 - [![Actix][Actix.dev]][Actix-url]
 - [![Flutter][Flutter.dev]][Flutter-url]
-- [![Docker][Docker.dev]][Docker-url]
-
 
 ## Team
 
 | [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="Assets/Olivia.jpeg" width="80" height="80" style="border-radius: 50%;" />][Olivia-Contact] | [<img src="Assets/Derick.jpeg" width="80" height="80" style="border-radius: 50%;" />][Derick-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
 |:---:|:---:|:---:|:---:|:---:|
-| **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Backend](https://img.shields.io/badge/-Backend-2F3C7E?style=flat-square) | **[Olivia Liau][Olivia-Contact]**<br>![Frontend](https://img.shields.io/badge/-Frontend-7A2048?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
+| **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Hardware-Interface](https://img.shields.io/badge/-Backend-2F3C7E?style=flat-square) | **[Olivia Liau][Olivia-Contact]**<br>![Development](https://img.shields.io/badge/-Frontend-7A2048?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Development](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Alpine-url]: https://alpinelinux.org/
 [Alpine.dev]: https://img.shields.io/badge/Alpine%20Linux-4E9FD1?style=for-the-badge&logo=alpine-linux&logoColor=white
 
+[Docker-url]: https://www.docker.com/
+[Docker.dev]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
 
 [Nginx-url]: https://nginx.org/
 [Nginx.dev]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white
@@ -29,8 +30,6 @@
 [Flutter-url]: https://flutter.dev/
 [Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white
 
-[Docker.dev]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
-[Docker-url]: https://www.docker.com/
 
 [Yaoyue-Contact]: https://www.linkedin.com/in/yaoyuewang/
 [Asher-Contact]: https://www.linkedin.com/in/asher-holtham/
