@@ -3,7 +3,6 @@
 ## Tech Stack
 
 - [![Apline][Alpine.dev]][Alpine-url]
-- [![Docker][Docker.dev]][Docker-url]
 - [![Nginx][Nginx.dev]][Nginx-url]
 - [![Actix][Actix.dev]][Actix-url]
 - [![Flutter][Flutter.dev]][Flutter-url]
@@ -17,9 +16,6 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 [Alpine-url]: https://alpinelinux.org/
 [Alpine.dev]: https://img.shields.io/badge/Alpine%20Linux-4E9FD1?style=for-the-badge&logo=alpine-linux&logoColor=white
-
-[Docker-url]: https://www.docker.com/
-[Docker.dev]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
 
 [Nginx-url]: https://nginx.org/
 [Nginx.dev]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white
