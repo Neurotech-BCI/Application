@@ -10,13 +10,13 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 
 [Debian-url]: https://www.debian.org/
-[Debian.dev]: https://img.shields.io/badge/Debian-CC0000?style=for-the-badge&logo=debian&logoColor=000000&logoWidth=40
+[Debian.dev]: https://img.shields.io/badge/Debian-CC0000?style=for-the-badge&logo=debian&logoColor=000000
 [Nginx-url]: https://nginx.org/
-[Nginx.dev]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=000000&logoWidth=40
+[Nginx.dev]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=000000
 [Actix-url]: https://actix.rs/
-[Actix.dev]: https://img.shields.io/badge/Actix-000000?style=for-the-badge&logo=actix&logoColor=32CD32&logoWidth=40
+[Actix.dev]: https://img.shields.io/badge/Actix-000000?style=for-the-badge&logo=actix&logoColor=white
 [Flutter-url]: https://flutter.dev/
-[Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=40C4FF&logoWidth=40
+[Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=40C4FF
 
 ## Team
 
