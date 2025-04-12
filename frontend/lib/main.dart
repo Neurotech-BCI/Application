@@ -56,7 +56,7 @@ class MainPageState extends State<MainPage> {
         //           return GestureDetector(
         //             onTap: openContainer,
         //             child: Container(
-        //               width: 56.0,
+        //               width: 112.0,
         //               height: 56.0,
         //               alignment: Alignment.center,
         //               decoration: BoxDecoration(
