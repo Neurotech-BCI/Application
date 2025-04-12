@@ -1,4 +1,4 @@
-# Neurotech USC BCI UI/UX Repository
+# Neurotech@USC Fatigue BCI Application Repository
 
 ## Tech Stack
 
@@ -18,7 +18,7 @@
 [Flutter-url]: https://flutter.dev/
 [Flutter.dev]: https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=40C4FF
 
-## Team
+<!-- ## Team -->
 
 <!-- | [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="Assets/Olivia.jpeg" width="80" height="80" style="border-radius: 50%;" />][Olivia-Contact] | [<img src="Assets/Derick.jpeg" width="80" height="80" style="border-radius: 50%;" />][Derick-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
 |:---:|:---:|:---:|:---:|:---:|
