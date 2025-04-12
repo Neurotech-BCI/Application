@@ -39,3 +39,5 @@ flutter:
   assets:
     - svg_assets/ApplicationBackground.svg
     - svg_assets/LogoCard.svg
+    - png_assets/background.png
+    - png_assets/logo.png
