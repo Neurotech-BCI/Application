@@ -37,7 +37,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - svg_assets/ApplicationBackground.svg
-    - svg_assets/LogoCard.svg
     - png_assets/background.png
     - png_assets/logo.png
+    - png_assets/header.png
+    - png_assets/headerText.png
