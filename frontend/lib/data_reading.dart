@@ -54,7 +54,12 @@ List<List<int>> cleanData(List<List<double>> data) {
 
 Future<List<List<int>>> parseCSV(String path) async {
   List<List<double>> data = await readCSV(path);
-  List<List<double>> frame = data.sublist(0, 127);
-  return cleanData(frame);
+  List<List<int>> clean = cleanData(data);
+  List<List<int>> frame = clean.sublist(0, 127);
+  return frame;
 }
 
+void main() async {
+  final data = await parseCSV('../datafiles/test.csv');
+  print(data);
+}

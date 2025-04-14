@@ -116,9 +116,9 @@ class Renderer extends CustomPainter {
         ..style = PaintingStyle.stroke;
 
       final Path path = Path();
-      for (int j = 0; j < plotData[i].length; j++) {
-        final double x = j * (size.width / plotData[i].length);
-        final double y = plotData[i][j].toDouble();
+      for (int j = 0; j < plotData.length; j++) {
+        final double x = j * (size.width / plotData.length);
+        final double y = plotData[j][i].toDouble();
         if (j == 0) {
           path.moveTo(x, y);
         } else {
