@@ -41,3 +41,4 @@ flutter:
     - png_assets/logo.png
     - png_assets/header.png
     - png_assets/headerText.png
+    - datafiles/test.csv

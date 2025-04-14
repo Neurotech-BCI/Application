@@ -52,12 +52,11 @@ class MainPageState extends State<MainPage> {
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
                     create: (_) => ConnectionControl(),
-                    child: const ConnectingPage(),
+                    child: DemoPage(),
                   );
                 },
                 closedBuilder:
                     (BuildContext context, VoidCallback openContainer) {
-                  // The closed state shows a FloatingActionButton.
                   return GestureDetector(
                     onTap: openContainer,
                     child: Container(
@@ -68,7 +67,7 @@ class MainPageState extends State<MainPage> {
                         borderRadius: BorderRadius.circular(16.0),
                         color: Colors.purple[200],
                       ),
-                      child: Text("Live Demo"),
+                      child: Text("Test Demo"),
                     ),
                   );
                 },
