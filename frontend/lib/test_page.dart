@@ -19,6 +19,7 @@ class PageController extends Cubit<PageState> {
             List.filled(16, List.filled(127, 0)), 1, DataParser()));
 
   void update() async {
+    await Future.delayed(const Duration(seconds: 1));
     while (true) {
       await Future.delayed(const Duration(milliseconds: 200));
       final newData = await state.parser.parseCSV(state.index);

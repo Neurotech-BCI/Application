@@ -38,7 +38,12 @@ class MainPageState extends State<MainPage> {
         Positioned.fill(
           child: Image.asset('png_assets/background.png', fit: BoxFit.cover),
         ),
-        Center(child: Image.asset('png_assets/logo.png')),
+        Center(
+            child: Transform.scale(
+          alignment: Alignment(-0.5, -1.0),
+          scale: 0.85, // 50% of the original size
+          child: Image.asset('png_assets/logo.png'),
+        )),
         Container(
           padding: EdgeInsets.all(12),
           alignment: Alignment(0.3, .85),
@@ -83,7 +88,7 @@ class MainPageState extends State<MainPage> {
               width: 120,
               height: 60,
               child: OpenContainer(
-                transitionDuration: Duration(milliseconds: 500),
+                transitionDuration: Duration(seconds: 1),
                 transitionType: ContainerTransitionType.fadeThrough,
                 closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
