@@ -48,8 +48,16 @@ class DataParser {
     List<List<int>> cleanData = List.generate(
         data.length, (index) => List.filled(data[index].length, 0));
 
-    for (int i = 0; i < data.length; i++) {
-      cleanData[i] = scaleToRange(data[i]);
+    for (int i = 0; i < 16; i++) {
+      List<double> newDataRow = [];
+      for (int j = 0; j < data.length; j++) {
+        newDataRow.add(data[j][i]);
+      }
+      List<int> cleanNew = scaleToRange(newDataRow);
+      print(cleanNew);
+      for (int j = 0; j < cleanNew.length; j++) {
+        cleanData[j][i] = cleanNew[j];
+      }
     }
     return cleanData;
   }

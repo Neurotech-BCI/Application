@@ -16,14 +16,14 @@ class PageState {
 class PageController extends Cubit<PageState> {
   PageController()
       : super(PageState("No Data", "Starting ...",
-            List.filled(16, List.filled(127, 0)), 0, DataParser()));
+            List.filled(16, List.filled(127, 0)), 1, DataParser()));
 
   void update() async {
     while (true) {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 200));
       final newData = await state.parser.parseCSV(state.index);
       if (newData.length == 127) {
-        emit(PageState(state.mRes, "EEG reading at Second: ${state.index + 1}",
+        emit(PageState(state.mRes, "EEG reading at Second: ${state.index}",
             newData, state.index + 1, state.parser));
       } else {
         emit(PageState(
