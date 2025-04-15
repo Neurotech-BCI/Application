@@ -111,7 +111,7 @@ class Renderer extends CustomPainter {
     for (int i = 0; i < channelColors.length; i++) {
       final paint = Paint()
         ..color = channelColors[i]
-        ..strokeWidth = 0.2
+        ..strokeWidth = 1.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
