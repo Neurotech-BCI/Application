@@ -32,6 +32,8 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
+    TextStyle tStyle = TextStyle(
+        color: Colors.white, fontFamily: 'Roboto', fontWeight: FontWeight.w900);
     return Scaffold(
         body: Stack(
       children: [
@@ -75,7 +77,7 @@ class MainPageState extends State<MainPage> {
                         borderRadius: BorderRadius.circular(8.0),
                         color: const Color.fromARGB(255, 219, 162, 229),
                       ),
-                      child: Text("Live Recording"),
+                      child: Text("Live Recording", style: tStyle),
                     ),
                   );
                 },
@@ -114,7 +116,7 @@ class MainPageState extends State<MainPage> {
                         borderRadius: BorderRadius.circular(8.0),
                         color: const Color.fromARGB(255, 228, 180, 90),
                       ),
-                      child: Text("Test Recording"),
+                      child: Text("Test Recording", style: tStyle),
                     ),
                   );
                 },
