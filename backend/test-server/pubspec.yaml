@@ -1,0 +1,9 @@
+name: server
+description: A simple server application using Shelf.
+version: 0.1.0
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
-import 'connecting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'demo_page.dart' as demo;
 
@@ -52,7 +51,7 @@ class MainPageState extends State<MainPage> {
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => demo.PageController(),
+                    create: (_) => demo.PageController()..fetchData(),
                     child: demo.DemoPage(),
                   );
                 },
@@ -68,7 +67,7 @@ class MainPageState extends State<MainPage> {
                         borderRadius: BorderRadius.circular(16.0),
                         color: Colors.purple[200],
                       ),
-                      child: Text("Test Demo"),
+                      child: Text("Test"),
                     ),
                   );
                 },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'plotted_data.dart';
+import 'package:http/http.dart' as http;
 
 List<List<int>> data = [
   [222, 500, 39, 181, 92, 120, 395, 313, 113, 0, 26, 77, 90, 81, 97, 95],
@@ -133,15 +134,22 @@ List<List<int>> data = [
 ];
 
 class PageState {
-  final int index;
-  PageState(this.index);
+  final String mData;
+  PageState(this.mData);
 }
 
 class PageController extends Cubit<PageState> {
-  PageController() : super(PageState(0)); // No need to call update() here
+  PageController() : super(PageState("No Data"));
 
-  void update() async {
-    // Your update logic here
+  void update() async {}
+  Future<void> fetchData() async {
+    emit(PageState("fetching"));
+    final response = await http.get(Uri.parse('/api/data'));
+    if (response.statusCode == 200) {
+      emit(PageState(response.body));
+    } else {
+      emit(PageState('error'));
+    }
   }
 }
 
@@ -188,6 +196,7 @@ class DemoPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  Text(state.mData),
                   //const SizedBox(height: 10),
                   Expanded(child: PlottedData(data)), // TODO fix this
                 ],
