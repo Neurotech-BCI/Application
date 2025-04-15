@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'test_page.dart' as demo;
+import 'test_page.dart' as test;
+import 'live_page.dart' as live;
+import 'connecting.dart';
 
 void main() {
   runApp(const MainApplication());
@@ -38,23 +40,22 @@ class MainPageState extends State<MainPage> {
         ),
         Center(child: Image.asset('png_assets/logo.png')),
         Container(
-          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.all(12),
+          alignment: Alignment(0.3, .85),
           child: SizedBox(
-              width: 100,
-              height: 50,
+              width: 120,
+              height: 60,
               child: OpenContainer(
                 transitionDuration: Duration(milliseconds: 500),
                 transitionType: ContainerTransitionType.fadeThrough,
                 closedShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => demo.PageController()
-                      ..update()
-                      ..fetchData(),
-                    child: demo.DemoPage(),
+                    create: (_) => ConnectionControl(),
+                    child: live.LivePage(),
                   );
                 },
                 closedBuilder:
@@ -66,15 +67,54 @@ class MainPageState extends State<MainPage> {
                       height: 56.0,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.0),
-                        color: Colors.purple[200],
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: const Color.fromARGB(255, 219, 162, 229),
                       ),
-                      child: Text("Test"),
+                      child: Text("Live Recording"),
                     ),
                   );
                 },
               )),
-        )
+        ),
+        Container(
+          padding: EdgeInsets.all(12),
+          alignment: Alignment(-0.3, .85),
+          child: SizedBox(
+              width: 120,
+              height: 60,
+              child: OpenContainer(
+                transitionDuration: Duration(milliseconds: 500),
+                transitionType: ContainerTransitionType.fadeThrough,
+                closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                closedElevation: 6.0,
+                openBuilder: (BuildContext context, VoidCallback _) {
+                  return BlocProvider(
+                    create: (_) => test.PageController()
+                      ..update()
+                      ..fetchData(),
+                    child: test.TestPage(),
+                  );
+                },
+                closedBuilder:
+                    (BuildContext context, VoidCallback openContainer) {
+                  return GestureDetector(
+                    onTap: openContainer,
+                    child: Container(
+                      width: 112.0,
+                      height: 56.0,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: const Color.fromARGB(255, 228, 180, 90),
+                      ),
+                      child: Text("Test Recording"),
+                    ),
+                  );
+                },
+              )),
+        ),
       ],
     ));
   }

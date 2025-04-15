@@ -53,8 +53,8 @@ class PageController extends Cubit<PageState> {
   }
 }
 
-class DemoPage extends StatelessWidget {
-  const DemoPage({super.key});
+class TestPage extends StatelessWidget {
+  const TestPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -96,10 +96,15 @@ class DemoPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Text(state.mOutput)]),
-                  Expanded(child: PlottedData(state.mData)), // TODO fix this
+                  SizedBox(height: 15),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text(state.mOutput,
+                        style: TextStyle(
+                            fontSize: 15.0,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w900))
+                  ]),
+                  Expanded(child: PlottedData(state.mData)),
                 ],
               );
             },

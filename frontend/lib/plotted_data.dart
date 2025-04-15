@@ -55,43 +55,42 @@ class _PlottedDataState extends State<PlottedData> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const SizedBox(height: 10),
+        const SizedBox(height: 5),
         LayoutBuilder(
           builder: (context, constraints) {
             double screenWidth = constraints.maxWidth;
             return CustomPaint(
               painter: Renderer(widget.plotData),
-              size: Size(screenWidth, 500),
+              size: Size(screenWidth, 450),
             );
           },
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(channelColors.length, (index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Channel ${index + 1}",
-                        style:
-                            TextStyle(fontSize: 8, fontWeight: FontWeight.w900),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 10,
-                        height: 10,
-                        color: channelColors[index],
-                      ),
-                    ],
+          child: Wrap(
+            spacing: 8.0, // horizontal gap between children
+            runSpacing: 8.0, // vertical gap between lines
+            children: List.generate(channelColors.length, (index) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Channel ${index + 1}",
+                    style: const TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                );
-              }),
-            ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    color: channelColors[index],
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              );
+            }),
           ),
         ),
       ],
@@ -107,11 +106,10 @@ class Renderer extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // For each channel, generate a random path.
     for (int i = 0; i < channelColors.length; i++) {
       final paint = Paint()
         ..color = channelColors[i]
-        ..strokeWidth = 1.0
+        ..strokeWidth = 1.5
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 

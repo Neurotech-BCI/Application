@@ -5,7 +5,7 @@ class DataParser {
   DataParser();
 
   List<int> scaleToRange(List<double> values,
-      {double minScale = 0, double maxScale = 500}) {
+      {double minScale = 0, double maxScale = 450}) {
     if (values.isEmpty) return [];
 
     double minValue = values.reduce((a, b) => a < b ? a : b);
