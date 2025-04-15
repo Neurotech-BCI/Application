@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'demo_page.dart' as demo;
+import 'test_page.dart' as demo;
 
 void main() {
   runApp(const MainApplication());
@@ -51,7 +51,9 @@ class MainPageState extends State<MainPage> {
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => demo.PageController()..fetchData(),
+                    create: (_) => demo.PageController()
+                      ..update()
+                      ..fetchData(),
                     child: demo.DemoPage(),
                   );
                 },

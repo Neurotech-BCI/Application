@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:csv/csv.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class DataParser {
   DataParser();
@@ -23,9 +23,8 @@ class DataParser {
     }).toList();
   }
 
-  Future<List<List<double>>> readCSV(String path) async {
-    final file = File(path);
-    final csvContent = await file.readAsString();
+  Future<List<List<double>>> readCSV() async {
+    final csvContent = await rootBundle.loadString('datafiles/test.csv');
     List<List<dynamic>> rawCsv =
         const CsvToListConverter(fieldDelimiter: '\t').convert(csvContent);
 
@@ -55,9 +54,14 @@ class DataParser {
     return cleanData;
   }
 
-  Future<List<List<int>>> parseCSV(String path) async {
-    List<List<double>> data = await readCSV(path);
-    List<List<double>> frame = data.sublist(0, 127);
-    return cleanData(frame);
+  Future<List<List<int>>> parseCSV(int index) async {
+    List<List<double>> data = await readCSV();
+    if (127 + index * 127 > data.length) {
+      return cleanData(data);
+    } else {
+      List<List<double>> frame =
+          data.sublist(0 + index * 127, 127 + index * 127);
+      return cleanData(frame);
+    }
   }
 }
