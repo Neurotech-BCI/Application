@@ -5,9 +5,8 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.1
+  sdk: ">=3.6.1 <4.0.0"
 
-# Dependencies specify other packages that your package
 dependencies:
   flutter:
     sdk: flutter
@@ -29,16 +28,18 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Good coding practices
   flutter_lints: ^5.0.0
 
-# Flutter packages.
 flutter:
   uses-material-design: true
-
+  fonts:
+    - family: "alte haas grotesk"
+      fonts:
+        - asset: "fonts/AlteHaasGroteskRegular.ttf"
   assets:
-    - png_assets/background.png
-    - png_assets/logo.png
-    - png_assets/header.png
-    - png_assets/headerText.png
-    - datafiles/test.csv
+    - "png_assets/background.png"
+    - "png_assets/logo.png"
+    - "png_assets/header.png"
+    - "png_assets/headerText.png"
+    - "datafiles/test.csv"
+    - "datafiles/test2.csv"

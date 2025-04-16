@@ -32,8 +32,10 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    TextStyle tStyle = TextStyle(
-        color: Colors.white, fontFamily: 'Roboto', fontWeight: FontWeight.w900);
+    const TextStyle tStyle = TextStyle(
+        color: Colors.white,
+        fontFamily: 'alte haas grotesk',
+        fontWeight: FontWeight.w500);
     return Scaffold(
         body: Stack(
       children: [
@@ -43,7 +45,7 @@ class MainPageState extends State<MainPage> {
         Center(
             child: Transform.scale(
           alignment: Alignment(-0.5, -1.0),
-          scale: 0.85, // 50% of the original size
+          scale: 0.85,
           child: Image.asset('png_assets/logo.png'),
         )),
         Container(
@@ -100,7 +102,7 @@ class MainPageState extends State<MainPage> {
                   return BlocProvider(
                     create: (_) => test.PageController()
                       ..update()
-                      ..fetchData(),
+                      ..fetchTestInfrence(),
                     child: test.TestPage(),
                   );
                 },

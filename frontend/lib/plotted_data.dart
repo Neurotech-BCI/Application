@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-//import 'data_reading.dart';
 
 final List<Color> channelColors = [
   Color(0xFF00FF80),
@@ -22,23 +21,19 @@ final List<Color> channelColors = [
   Color(0xFF8000FF),
 ];
 
-class PlottedData extends StatefulWidget {
+class SinglePlottedData extends StatefulWidget {
   final List<List<int>> plotData;
-  const PlottedData(this.plotData, {super.key});
+  const SinglePlottedData(this.plotData, {super.key});
 
   @override
-  State<PlottedData> createState() => _PlottedDataState();
+  State<SinglePlottedData> createState() => _SinglePlottedDataState();
 }
 
-class _PlottedDataState extends State<PlottedData> {
+class _SinglePlottedDataState extends State<SinglePlottedData> {
   late Timer _timer;
-  //late List<List<int>> data;
-  //late int second;
   @override
   void initState() {
     super.initState();
-    //second = 0;
-    //data = await parseCSV('datafiles/test.csv');
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       setState(() {});
     });
@@ -58,10 +53,10 @@ class _PlottedDataState extends State<PlottedData> {
         const SizedBox(height: 5),
         LayoutBuilder(
           builder: (context, constraints) {
-            double screenWidth = constraints.maxWidth;
+            double plotWidth = constraints.maxWidth * (9 / 10);
             return CustomPaint(
-              painter: Renderer(widget.plotData),
-              size: Size(screenWidth, 450),
+              painter: SinglePlotRenderer(widget.plotData),
+              size: Size(plotWidth, 450),
             );
           },
         ),
@@ -77,17 +72,17 @@ class _PlottedDataState extends State<PlottedData> {
                   Text(
                     "Channel ${index + 1}",
                     style: const TextStyle(
-                      fontSize: 8,
+                      fontSize: 6,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Container(
-                    width: 10,
-                    height: 10,
+                    width: 8,
+                    height: 8,
                     color: channelColors[index],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                 ],
               );
             }),
@@ -98,9 +93,9 @@ class _PlottedDataState extends State<PlottedData> {
   }
 }
 
-class Renderer extends CustomPainter {
+class SinglePlotRenderer extends CustomPainter {
   final List<List<int>> plotData;
-  Renderer(this.plotData);
+  SinglePlotRenderer(this.plotData);
 
   final Random random = Random();
 
@@ -129,7 +124,113 @@ class Renderer extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // Return true so that the custom painter repaints every time a new instance is provided.
     return true;
+  }
+}
+
+class ChannelPlottedData extends StatefulWidget {
+  final int channelIndex;
+  final List<int> plotData;
+  const ChannelPlottedData(this.channelIndex, this.plotData, {super.key});
+
+  @override
+  State<ChannelPlottedData> createState() => _ChannelPlottedDataState();
+}
+
+class _ChannelPlottedDataState extends State<ChannelPlottedData> {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double colorDim = constraints.maxWidth * (1 / 30);
+        double openSpace = constraints.maxWidth * (1 / 20);
+        double plotWidth = constraints.maxWidth * (18 / 20);
+        return Container(
+            width: constraints.maxWidth,
+            padding: EdgeInsets.all(openSpace / 10),
+            margin: EdgeInsets.all(openSpace / 5),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+                width: 1.0,
+              ),
+            ),
+            child: Row(children: [
+              Container(
+                height: colorDim,
+                width: colorDim,
+                color: channelColors[widget.channelIndex],
+              ),
+              SizedBox(width: openSpace / 2),
+              CustomPaint(
+                painter:
+                    ChannelPlotRenderer(widget.channelIndex, widget.plotData),
+                size: Size(plotWidth, 50),
+              )
+            ]));
+      },
+    );
+  }
+}
+
+class ChannelPlotRenderer extends CustomPainter {
+  final int channelIndex;
+  final List<int> plotData;
+  ChannelPlotRenderer(this.channelIndex, this.plotData);
+
+  final Random random = Random();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = channelColors[channelIndex]
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final Path path = Path();
+    for (int j = 0; j < plotData.length; j++) {
+      final double x = j * (size.width / plotData.length);
+      final double y = plotData[j].toDouble();
+      if (j == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class ChannelPlotsView extends StatefulWidget {
+  final List<List<int>> plotsData;
+  final double mHeight;
+  const ChannelPlotsView(this.mHeight, this.plotsData, {super.key});
+
+  @override
+  State<ChannelPlotsView> createState() => _ChannelPlotsViewState();
+}
+
+class _ChannelPlotsViewState extends State<ChannelPlotsView> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.mHeight, // Specify a finite height here.
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            ...List.generate(
+              16,
+              (index) => ChannelPlottedData(index, widget.plotsData[index]),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
