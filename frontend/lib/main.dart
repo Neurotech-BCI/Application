@@ -92,7 +92,7 @@ class MainPageState extends State<MainPage> {
               width: 120,
               height: 60,
               child: OpenContainer(
-                transitionDuration: Duration(seconds: 1),
+                transitionDuration: Duration(seconds: 1, milliseconds: 500),
                 transitionType: ContainerTransitionType.fadeThrough,
                 closedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
@@ -100,7 +100,7 @@ class MainPageState extends State<MainPage> {
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => test.PageController()..init(),
+                    create: (_) => test.PageController(),
                     child: test.TestPage(),
                   );
                 },

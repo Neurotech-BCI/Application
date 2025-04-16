@@ -54,12 +54,15 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
         LayoutBuilder(
           builder: (context, constraints) {
             double plotWidth = constraints.maxWidth * (9 / 10);
+            double plotHeight = constraints.maxWidth * (5.5 / 10);
+
             return CustomPaint(
               painter: SinglePlotRenderer(widget.plotData),
-              size: Size(plotWidth, 450),
+              size: Size(plotWidth, plotHeight),
             );
           },
         ),
+        const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Wrap(
@@ -72,7 +75,8 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
                   Text(
                     "Channel ${index + 1}",
                     style: const TextStyle(
-                      fontSize: 6,
+                      fontSize: 8,
+                      fontFamily: 'alte haas grotesk',
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -82,7 +86,6 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
                     height: 8,
                     color: channelColors[index],
                   ),
-                  const SizedBox(height: 20),
                 ],
               );
             }),
@@ -140,11 +143,16 @@ class ChannelPlottedData extends StatefulWidget {
 class _ChannelPlottedDataState extends State<ChannelPlottedData> {
   @override
   Widget build(BuildContext context) {
+    const TextStyle channelLabelStyle = TextStyle(
+        fontSize: 11.0,
+        color: Colors.black,
+        fontFamily: 'alte haas grotesk',
+        fontWeight: FontWeight.w700);
     return LayoutBuilder(
       builder: (context, constraints) {
         double colorDim = constraints.maxWidth * (1 / 30);
         double openSpace = constraints.maxWidth * (1 / 20);
-        double plotWidth = constraints.maxWidth * (18 / 20);
+        double plotWidth = constraints.maxWidth * (3.75 / 5);
         return Container(
             width: constraints.maxWidth,
             padding: EdgeInsets.all(openSpace / 10),
@@ -156,6 +164,8 @@ class _ChannelPlottedDataState extends State<ChannelPlottedData> {
               ),
             ),
             child: Row(children: [
+              Text("Channel  ${widget.channelIndex}", style: channelLabelStyle),
+              SizedBox(width: openSpace / 6),
               Container(
                 height: colorDim,
                 width: colorDim,

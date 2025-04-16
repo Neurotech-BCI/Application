@@ -24,8 +24,10 @@ class PageController extends Cubit<PageState> {
             [],
             List.generate(127, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(127, 0)),
-            1,
-            DataParser()));
+            0,
+            DataParser())) {
+    init();
+  }
 
   void init() async {
     final rawData = await state.parser.readTest2CSV();
@@ -35,9 +37,9 @@ class PageController extends Cubit<PageState> {
   }
 
   void update() async {
-    await Future.delayed(const Duration(seconds: 1));
+    //await Future.delayed(const Duration(seconds: 1));
     while (true) {
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 400));
       final newDataFrame = state.mRawData
           .sublist(0 + state.index * 127, 127 + state.index * 127);
       final List<List<int>> dataFrame = state.parser.cleanData(newDataFrame);
@@ -109,7 +111,7 @@ class TestPage extends StatelessWidget {
               double headerTextWidth = 653 * scaleFactor;
               double headerTextHeight = 224 * scaleFactor;
               double channelViewHeight =
-                  constraints.maxHeight - headerHeight - 100;
+                  constraints.maxHeight - headerHeight - 35;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -138,14 +140,6 @@ class TestPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 15),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Text(state.mOutput,
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontFamily: 'alte haas grotesk',
-                            fontWeight: FontWeight.w500))
-                  ]),
-                  SizedBox(height: 10),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -156,8 +150,17 @@ class TestPage extends StatelessWidget {
                       ),
                       SizedBox(
                         width: screenWidth * (6.25 / 10),
-                        child: SinglePlottedData(state.mDataFrame),
-                      ),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(state.mOutput,
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontFamily: 'alte haas grotesk',
+                                      fontWeight: FontWeight.w500)),
+                              SinglePlottedData(state.mDataFrame),
+                            ]),
+                      )
                     ],
                   )
                 ],

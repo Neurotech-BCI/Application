@@ -48,10 +48,11 @@ class ConnectingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ConnectionControl, Connection>(
         builder: (context, state) {
-      const textStyle = TextStyle(
-        fontFamily: 'Roboto',
-        fontSize: 50,
-      );
+      const TextStyle textStyle = TextStyle(
+          fontSize: 25,
+          color: Colors.black,
+          fontFamily: 'alte haas grotesk',
+          fontWeight: FontWeight.w500);
       return Center(
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
         Column(mainAxisAlignment: MainAxisAlignment.center, children: [
