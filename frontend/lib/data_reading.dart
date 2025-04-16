@@ -96,30 +96,12 @@ class DataParser {
     return cleanedIndexedChannels;
   }
 
-  Future<List<List<int>>> parseTestCSV(int index, bool channel) async {
-    List<List<double>> data = await readTest2CSV();
-    if (127 + index * 127 > data.length) {
-      if (channel) {
-        return cleanChannelPlotsData(data);
-      } else {
-        return cleanData(data);
-      }
-    } else {
-      List<List<double>> frame =
-          data.sublist(0 + index * 127, 127 + index * 127);
-      if (channel) {
-        return cleanChannelPlotsData(frame);
-      } else {
-        return cleanData(frame);
-      }
-    }
-  }
-
   List<List<int>> indexChannels(List<List<int>> data) {
     List<List<int>> channelsIndexed =
-        List.filled(16, List.filled(data.length, 0));
-    for (int i = 0; i < 16; i++) {
-      for (int j = 0; j < data.length; j++) {
+        List.generate(16, (_) => List.filled(data.length, 0));
+
+    for (int j = 0; j < data.length; j++) {
+      for (int i = 0; i < data[j].length; i++) {
         channelsIndexed[i][j] = data[j][i];
       }
     }

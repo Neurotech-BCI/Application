@@ -100,9 +100,7 @@ class MainPageState extends State<MainPage> {
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => test.PageController()
-                      ..update()
-                      ..fetchTestInfrence(),
+                    create: (_) => test.PageController()..init(),
                     child: test.TestPage(),
                   );
                 },
