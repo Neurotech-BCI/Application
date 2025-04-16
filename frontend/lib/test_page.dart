@@ -40,13 +40,13 @@ class PageController extends Cubit<PageState> {
     //await Future.delayed(const Duration(seconds: 1));
     while (true) {
       await Future.delayed(const Duration(milliseconds: 400));
-      final newDataFrame = state.mRawData
-          .sublist(0 + state.index * 127, 127 + state.index * 127);
-      final List<List<int>> dataFrame = state.parser.cleanData(newDataFrame);
-      final List<List<int>> channelDataFrame =
-          state.parser.cleanChannelPlotsData(newDataFrame);
+      if (127 + state.index * 127 <= state.mRawData.length) {
+        final newDataFrame = state.mRawData
+            .sublist(0 + state.index * 127, 127 + state.index * 127);
+        final List<List<int>> dataFrame = state.parser.cleanData(newDataFrame);
+        final List<List<int>> channelDataFrame =
+            state.parser.cleanChannelPlotsData(newDataFrame);
 
-      if (newDataFrame.length == 127) {
         emit(PageState(
             state.mRes,
             "EEG reading at Second: ${state.index}",
