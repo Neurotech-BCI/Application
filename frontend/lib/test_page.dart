@@ -24,7 +24,7 @@ class PageController extends Cubit<PageState> {
             [],
             List.generate(127, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(127, 0)),
-            0,
+            1,
             DataParser())) {
     init();
   }

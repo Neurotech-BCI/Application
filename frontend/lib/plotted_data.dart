@@ -3,22 +3,22 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 final List<Color> channelColors = [
-  Color(0xFF00FF80),
-  Color(0xFF00FFA1),
-  Color(0xFF00FFC3),
-  Color(0xFF00FFEA),
-  Color(0xFF00F7FF),
-  Color(0xFF00D4FF),
-  Color(0xFF00B3FF),
-  Color(0xFF0090FF),
-  Color(0xFF006EFF),
-  Color(0xFF004CFF),
-  Color(0xFF002AFF),
-  Color(0xFF0008FF),
-  Color(0xFFE600FF),
-  Color(0xFFC400FF),
-  Color(0xFFA100FF),
-  Color(0xFF8000FF),
+  Color(0xFFE57373), // Red 300 (darker red)
+  Color(0xFFFFAB91), // Deep Orange 200
+  Color(0xFFFFCC80), // Orange 200
+  Color(0xFFFFE082), // Amber 200
+  Color(0xFFFFF59D), // Yellow 200
+  Color(0xFFE6EE9C), // Lime 200
+  Color(0xFFC5E1A5), // Light Green 200
+  Color(0xFFA5D6A7), // Green 200
+  Color(0xFF80CBC4), // Teal 200
+  Color(0xFF80DEEA), // Cyan 200
+  Color(0xFF81D4FA), // Light Blue 200
+  Color(0xFF90CAF9), // Blue 200
+  Color(0xFF9FA8DA), // Indigo 200
+  Color(0xFFB39DDB), // Deep Purple 200
+  Color(0xFFCE93D8), // Purple 200
+  Color(0xFFF8BBD0), // Pink 200
 ];
 
 class SinglePlottedData extends StatefulWidget {
@@ -107,7 +107,7 @@ class SinglePlotRenderer extends CustomPainter {
     for (int i = 0; i < channelColors.length; i++) {
       final paint = Paint()
         ..color = channelColors[i]
-        ..strokeWidth = 1.5
+        ..strokeWidth = 1.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
@@ -194,7 +194,7 @@ class ChannelPlotRenderer extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = channelColors[channelIndex]
-      ..strokeWidth = 1.5
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
