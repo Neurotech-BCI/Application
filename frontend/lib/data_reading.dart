@@ -4,6 +4,80 @@ import 'package:flutter/services.dart' show rootBundle;
 class DataParser {
   DataParser();
 
+  /// Groups every [x] rows, averages them (rounding to int), and emits one row per group.
+  /// - Input:  matrix of size R×C
+  /// - Output: matrix of size ⌈R/x⌉×C, with int averages
+  List<List<int>> averageEveryXRows(int x, List<List<int>> matrix) {
+    if (x <= 0) throw ArgumentError.value(x, 'x must be > 0');
+    final rowCount = matrix.length;
+    if (rowCount == 0) return [];
+    final colCount = matrix[0].length;
+    // verify rectangular
+    for (var row in matrix) {
+      if (row.length != colCount) {
+        throw ArgumentError('All rows must have the same length');
+      }
+    }
+
+    final newRowCount = (rowCount + x - 1) ~/ x;
+    final result = List.generate(
+      newRowCount,
+      (_) => List<int>.filled(colCount, 0),
+    );
+
+    for (var i = 0; i < rowCount; i += x) {
+      final chunkSize = ((i + x) <= rowCount) ? x : (rowCount - i);
+      final outRow = i ~/ x;
+
+      for (var j = 0; j < colCount; j++) {
+        var sum = 0;
+        for (var k = i; k < i + chunkSize; k++) {
+          sum += matrix[k][j];
+        }
+        result[outRow][j] = (sum / chunkSize).round();
+      }
+    }
+
+    return result;
+  }
+
+  /// Groups every [x] columns, averages them (rounding to int), and emits one column per group.
+  /// - Input:  matrix of size R×C
+  /// - Output: matrix of size R×⌈C/x⌉, with int averages
+  List<List<int>> averageEveryXColumns(int x, List<List<int>> matrix) {
+    if (x <= 0) throw ArgumentError.value(x, 'x must be > 0');
+    final rowCount = matrix.length;
+    if (rowCount == 0) return [];
+    final colCount = matrix[0].length;
+    // verify rectangular
+    for (var row in matrix) {
+      if (row.length != colCount) {
+        throw ArgumentError('All rows must have the same length');
+      }
+    }
+
+    final newColCount = (colCount + x - 1) ~/ x;
+    final result = List.generate(
+      rowCount,
+      (_) => List<int>.filled(newColCount, 0),
+    );
+
+    for (var j = 0; j < colCount; j += x) {
+      final chunkSize = ((j + x) <= colCount) ? x : (colCount - j);
+      final outCol = j ~/ x;
+
+      for (var i = 0; i < rowCount; i++) {
+        var sum = 0;
+        for (var k = j; k < j + chunkSize; k++) {
+          sum += matrix[i][k];
+        }
+        result[i][outCol] = (sum / chunkSize).round();
+      }
+    }
+
+    return result;
+  }
+
   List<int> scaleToRange(List<double> values, double maxScale,
       {double minScale = 0}) {
     if (values.isEmpty) return [];
@@ -40,7 +114,7 @@ class DataParser {
       parsed.add(row);
       index += 16 + 15;
     }
-    return parsed;
+    return parsed.sublist(127, parsed.length);
   }
 
   Future<List<List<double>>> readTest2CSV() async {

@@ -30,7 +30,7 @@ class PageController extends Cubit<PageState> {
   }
 
   void init() async {
-    final rawData = await state.parser.readTest2CSV();
+    final rawData = await state.parser.readTestCSV();
     emit(PageState(state.mRes, "EEG reading at Second: ${state.index}", rawData,
         state.mDataFrame, state.mChannelDataFrame, state.index, state.parser));
     update();
@@ -62,12 +62,13 @@ class PageController extends Cubit<PageState> {
             state.parser.cleanChannelPlotsData(state.mRawData);
         emit(PageState(
             state.mRes,
-            "Final EEG reading, Model Prediction: ${state.mRes}",
+            "Final EEG reading..., Model Prediction Widget needs to be built",
             state.mRawData,
-            dataFrame,
-            channelDataFrame,
+            state.parser.averageEveryXRows(127, dataFrame),
+            state.parser.averageEveryXColumns(127, channelDataFrame),
             state.index,
             state.parser));
+        break;
       }
     }
   }
