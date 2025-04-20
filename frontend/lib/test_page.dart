@@ -154,12 +154,13 @@ class TestPage extends StatelessWidget {
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              SinglePlottedData(state.mDataFrame),
                               Text(state.mOutput,
                                   style: TextStyle(
                                       fontSize: 16.0,
                                       fontFamily: 'alte haas grotesk',
                                       fontWeight: FontWeight.w500)),
-                              SinglePlottedData(state.mDataFrame),
+                              buildLoadingBar(percent: state.index / 120),
                             ]),
                       )
                     ],

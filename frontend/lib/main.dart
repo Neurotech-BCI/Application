@@ -3,7 +3,6 @@ import 'package:animations/animations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'test_page.dart' as test;
 import 'live_page.dart' as live;
-import 'connecting.dart';
 
 void main() {
   runApp(const MainApplication());
@@ -63,7 +62,7 @@ class MainPageState extends State<MainPage> {
                 closedElevation: 6.0,
                 openBuilder: (BuildContext context, VoidCallback _) {
                   return BlocProvider(
-                    create: (_) => ConnectionControl(),
+                    create: (_) => live.LivePageController(),
                     child: live.LivePage(),
                   );
                 },

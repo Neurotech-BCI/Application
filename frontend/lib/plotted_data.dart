@@ -62,35 +62,6 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
             );
           },
         ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Wrap(
-            spacing: 8.0, // horizontal gap between children
-            runSpacing: 8.0, // vertical gap between lines
-            children: List.generate(channelColors.length, (index) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Channel ${index + 1}",
-                    style: const TextStyle(
-                      fontSize: 8,
-                      fontFamily: 'alte haas grotesk',
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    color: channelColors[index],
-                  ),
-                ],
-              );
-            }),
-          ),
-        ),
       ],
     );
   }
@@ -243,4 +214,33 @@ class _ChannelPlotsViewState extends State<ChannelPlotsView> {
       ),
     );
   }
+}
+
+Widget buildLoadingBar({
+  required double percent,
+  double height = 20,
+  Color backgroundColor = Colors.grey,
+  Color fillColor = const Color(0xFFF8BBD0),
+  double borderRadius = 4,
+}) {
+  assert(percent >= 0 && percent <= 1);
+  return Container(
+    height: height,
+    decoration: BoxDecoration(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: percent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: fillColor,
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        ),
+      ),
+    ),
+  );
 }
