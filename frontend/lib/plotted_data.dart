@@ -34,9 +34,7 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      setState(() {});
-    });
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) => setState(() {}));
   }
 
   @override
@@ -47,22 +45,10 @@ class _SinglePlottedDataState extends State<SinglePlottedData> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const SizedBox(height: 5),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            double plotWidth = constraints.maxWidth * (9 / 10);
-            double plotHeight = constraints.maxWidth * (5.5 / 10);
-
-            return CustomPaint(
-              painter: SinglePlotRenderer(widget.plotData),
-              size: Size(plotWidth, plotHeight),
-            );
-          },
-        ),
-      ],
+    return SizedBox.expand(
+      child: CustomPaint(
+        painter: SinglePlotRenderer(widget.plotData),
+      ),
     );
   }
 }
@@ -219,7 +205,7 @@ class _ChannelPlotsViewState extends State<ChannelPlotsView> {
 Widget buildLoadingBar({
   required double percent,
   double height = 20,
-  Color backgroundColor = Colors.grey,
+  Color backgroundColor = const Color.fromARGB(255, 255, 255, 255),
   Color fillColor = const Color(0xFFF8BBD0),
   double borderRadius = 4,
 }) {
@@ -229,6 +215,7 @@ Widget buildLoadingBar({
     decoration: BoxDecoration(
       color: backgroundColor,
       borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: Colors.black, width: 1),
     ),
     child: Align(
       alignment: Alignment.centerLeft,
@@ -236,11 +223,141 @@ Widget buildLoadingBar({
         widthFactor: percent,
         child: Container(
           decoration: BoxDecoration(
-            color: fillColor,
+            color: channelColors[(percent * 15).round()],
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
       ),
     ),
   );
+}
+
+Widget buildFatigueScore({
+  required int score,
+  int maxScore = 3,
+  double boxSize = 25,
+  Color fillColor = const Color(0xFFB39DDB),
+}) {
+  assert(score >= 0 && score <= maxScore);
+
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text(
+          'Fatigue Score:',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'alte haas grotesk',
+            fontWeight: FontWeight.w500,
+            fontSize: 16.0,
+          ),
+        ),
+        const SizedBox(width: 6),
+        ...List.generate(maxScore, (i) {
+          final filled = i < score;
+          return Padding(
+            padding: EdgeInsets.only(right: i == maxScore - 1 ? 0 : 6),
+            child: Container(
+              height: boxSize,
+              width: boxSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: filled ? fillColor : Colors.transparent,
+                border: Border.all(color: Colors.black, width: 1),
+              ),
+            ),
+          );
+        }),
+      ],
+    ),
+  );
+}
+
+class FatigueAPIinterface extends StatefulWidget {
+  final int mIndex;
+  final bool mShowFatigueLevel;
+  final int mFatigeScore;
+
+  const FatigueAPIinterface(
+      this.mIndex, this.mShowFatigueLevel, this.mFatigeScore,
+      {super.key});
+
+  @override
+  State<FatigueAPIinterface> createState() => _FatigueAPIinterfaceState();
+}
+
+class _FatigueAPIinterfaceState extends State<FatigueAPIinterface> {
+  @override
+  Widget build(BuildContext context) {
+    const TextStyle tStyle = TextStyle(
+        color: Color.fromARGB(255, 0, 0, 0),
+        fontFamily: 'alte haas grotesk',
+        fontSize: 16.0,
+        fontWeight: FontWeight.w500);
+    return SizedBox(
+      child: widget.mShowFatigueLevel
+          ? buildFatigueScore(score: widget.mFatigeScore)
+          : Column(children: [
+              Text("Loading EEG Data", style: tStyle),
+              buildLoadingBar(percent: widget.mIndex / 120)
+            ]),
+    );
+  }
+}
+
+class ChannelFatigueView extends StatelessWidget {
+  final double screenWidth;
+  final double channelViewHeight;
+  final int index;
+  final bool showFatigueLevel;
+  final List<List<int>> channelDataFrame;
+  final List<List<int>> dataFrame;
+
+  const ChannelFatigueView({
+    super.key,
+    required this.screenWidth,
+    required this.channelViewHeight,
+    required this.index,
+    required this.showFatigueLevel,
+    required this.channelDataFrame,
+    required this.dataFrame,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: screenWidth * 0.375,
+            child: ChannelPlotsView(channelViewHeight, channelDataFrame),
+          ),
+          SizedBox(
+            width: screenWidth * 0.625,
+            height: channelViewHeight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: screenWidth * 0.5,
+                  child: FatigueAPIinterface(index, showFatigueLevel, 2),
+                ),
+                SizedBox(height: channelViewHeight * 0.05),
+                SizedBox(
+                  width: screenWidth * 0.575,
+                  height: channelViewHeight * 0.6,
+                  child: SinglePlottedData(dataFrame),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

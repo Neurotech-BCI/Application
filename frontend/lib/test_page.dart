@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'plotted_data.dart';
-import 'package:http/http.dart' as http;
 import 'data_reading.dart';
 
 class PageState {
-  final String mRes;
-  final String mOutput;
+  final bool mShowFatigeLevel;
   final List<List<double>> mRawData;
   final List<List<int>> mDataFrame;
   final List<List<int>> mChannelDataFrame;
   final int index;
   final DataParser parser;
-  PageState(this.mRes, this.mOutput, this.mRawData, this.mDataFrame,
+  PageState(this.mShowFatigeLevel, this.mRawData, this.mDataFrame,
       this.mChannelDataFrame, this.index, this.parser);
 }
 
 class PageController extends Cubit<PageState> {
   PageController()
       : super(PageState(
-            "No Data",
-            "Starting ...",
+            false,
             [],
             List.generate(127, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(127, 0)),
@@ -31,8 +28,8 @@ class PageController extends Cubit<PageState> {
 
   void init() async {
     final rawData = await state.parser.readTestCSV();
-    emit(PageState(state.mRes, "EEG reading at Second: ${state.index}", rawData,
-        state.mDataFrame, state.mChannelDataFrame, state.index, state.parser));
+    emit(PageState(state.mShowFatigeLevel, rawData, state.mDataFrame,
+        state.mChannelDataFrame, state.index, state.parser));
     update();
   }
 
@@ -47,22 +44,15 @@ class PageController extends Cubit<PageState> {
         final List<List<int>> channelDataFrame =
             state.parser.cleanChannelPlotsData(newDataFrame);
 
-        emit(PageState(
-            state.mRes,
-            "EEG reading at Second: ${state.index}",
-            state.mRawData,
-            dataFrame,
-            channelDataFrame,
-            state.index + 1,
-            state.parser));
+        emit(PageState(state.mShowFatigeLevel, state.mRawData, dataFrame,
+            channelDataFrame, state.index + 1, state.parser));
       } else {
         final List<List<int>> dataFrame =
             state.parser.cleanData(state.mRawData);
         final List<List<int>> channelDataFrame =
             state.parser.cleanChannelPlotsData(state.mRawData);
         emit(PageState(
-            state.mRes,
-            "Final EEG reading..., Model Prediction Widget needs to be built",
+            true,
             state.mRawData,
             state.parser.averageEveryXRows(127, dataFrame),
             state.parser.averageEveryXColumns(127, channelDataFrame),
@@ -70,28 +60,6 @@ class PageController extends Cubit<PageState> {
             state.parser));
         break;
       }
-    }
-  }
-
-  Future<void> fetchTestInfrence() async {
-    emit(PageState("fetching", state.mOutput, state.mRawData, state.mDataFrame,
-        state.mChannelDataFrame, state.index, state.parser));
-    // Real address: 'https://bci-uscneuro.tech/api/data'
-    final response =
-        await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
-
-    if (response.statusCode == 200) {
-      emit(PageState(
-          response.body,
-          state.mOutput,
-          state.mRawData,
-          state.mDataFrame,
-          state.mChannelDataFrame,
-          state.index,
-          state.parser));
-    } else {
-      emit(PageState('error', state.mOutput, state.mRawData, state.mDataFrame,
-          state.mChannelDataFrame, state.index, state.parser));
     }
   }
 }
@@ -141,30 +109,14 @@ class TestPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 15),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: screenWidth * (3.75 / 10),
-                        child: ChannelPlotsView(
-                            channelViewHeight, state.mChannelDataFrame),
-                      ),
-                      SizedBox(
-                        width: screenWidth * (6.25 / 10),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SinglePlottedData(state.mDataFrame),
-                              Text(state.mOutput,
-                                  style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontFamily: 'alte haas grotesk',
-                                      fontWeight: FontWeight.w500)),
-                              buildLoadingBar(percent: state.index / 120),
-                            ]),
-                      )
-                    ],
-                  )
+                  ChannelFatigueView(
+                    screenWidth: screenWidth,
+                    channelViewHeight: channelViewHeight,
+                    index: state.index,
+                    showFatigueLevel: state.mShowFatigeLevel,
+                    channelDataFrame: state.mChannelDataFrame,
+                    dataFrame: state.mDataFrame,
+                  ),
                 ],
               );
             },
