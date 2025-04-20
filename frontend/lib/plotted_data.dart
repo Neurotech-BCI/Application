@@ -315,6 +315,7 @@ class ChannelFatigueView extends StatelessWidget {
   final double channelViewHeight;
   final int index;
   final bool showFatigueLevel;
+  final int fatigueLevel;
   final List<List<int>> channelDataFrame;
   final List<List<int>> dataFrame;
 
@@ -324,6 +325,7 @@ class ChannelFatigueView extends StatelessWidget {
     required this.channelViewHeight,
     required this.index,
     required this.showFatigueLevel,
+    required this.fatigueLevel,
     required this.channelDataFrame,
     required this.dataFrame,
   });
@@ -346,7 +348,8 @@ class ChannelFatigueView extends StatelessWidget {
               children: [
                 SizedBox(
                   width: screenWidth * 0.5,
-                  child: FatigueAPIinterface(index, showFatigueLevel, 2),
+                  child: FatigueAPIinterface(
+                      index, showFatigueLevel, fatigueLevel),
                 ),
                 SizedBox(height: channelViewHeight * 0.1),
                 SizedBox(

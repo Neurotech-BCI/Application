@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'plotted_data.dart';
+import 'data_reading.dart';
 
 class LivePageState {
   final String mOutput;
   final int mIndex;
-  LivePageState(this.mOutput, this.mIndex);
+  final int mFatigeLevel;
+  final bool mBeginDataStream;
+  final bool mFatigueResponse;
+  final List<List<double>> mRawData;
+  final List<List<int>> mDataFrame;
+  final List<List<int>> mChannelDataFrame;
+  final DataParser parser;
+
+  LivePageState(
+      this.mOutput,
+      this.mIndex,
+      this.mFatigeLevel,
+      this.mBeginDataStream,
+      this.mFatigueResponse,
+      this.mRawData,
+      this.mDataFrame,
+      this.mChannelDataFrame,
+      this.parser);
 }
 
 class LivePageController extends Cubit<LivePageState> {
   LivePageController()
       : super(LivePageState(
-          "Starting",
-          1,
-        )) {
+            "Starting", 1, 0, false, false, [], [], [], DataParser())) {
     startDemo();
   }
 
@@ -22,9 +39,15 @@ class LivePageController extends Cubit<LivePageState> {
       final response =
           await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
       emit(LivePageState(
-        response.body,
-        state.mIndex + 1,
-      ));
+          response.body,
+          state.mIndex + 1,
+          state.mFatigeLevel,
+          state.mBeginDataStream,
+          state.mFatigueResponse,
+          state.mRawData,
+          state.mDataFrame,
+          state.mChannelDataFrame,
+          state.parser));
     }
     stopDemo();
   }
@@ -33,9 +56,15 @@ class LivePageController extends Cubit<LivePageState> {
     final response =
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
     emit(LivePageState(
-      response.body,
-      state.mIndex,
-    ));
+        response.body,
+        state.mIndex,
+        state.mFatigeLevel,
+        state.mBeginDataStream,
+        state.mFatigueResponse,
+        state.mRawData,
+        state.mDataFrame,
+        state.mChannelDataFrame,
+        state.parser));
     poll();
   }
 
@@ -43,9 +72,15 @@ class LivePageController extends Cubit<LivePageState> {
     final response =
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/stop'));
     emit(LivePageState(
-      response.body,
-      state.mIndex,
-    ));
+        response.body,
+        state.mIndex,
+        state.mFatigeLevel,
+        state.mBeginDataStream,
+        state.mFatigueResponse,
+        state.mRawData,
+        state.mDataFrame,
+        state.mChannelDataFrame,
+        state.parser));
   }
 }
 
@@ -64,7 +99,8 @@ class LivePage extends StatelessWidget {
               double headerHeight = 207 * scaleFactor;
               double headerTextWidth = 653 * scaleFactor;
               double headerTextHeight = 224 * scaleFactor;
-
+              double channelViewHeight =
+                  constraints.maxHeight - headerHeight - 35;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -97,6 +133,17 @@ class LivePage extends StatelessWidget {
                           fontSize: 16.0,
                           fontFamily: 'alte haas grotesk',
                           fontWeight: FontWeight.w500)),
+                  SizedBox(height: 15),
+                  if (state.mBeginDataStream)
+                    ChannelFatigueView(
+                      screenWidth: screenWidth,
+                      channelViewHeight: channelViewHeight,
+                      index: state.mIndex,
+                      showFatigueLevel: state.mFatigueResponse,
+                      fatigueLevel: state.mFatigeLevel,
+                      channelDataFrame: state.mChannelDataFrame,
+                      dataFrame: state.mDataFrame,
+                    ),
                 ],
               );
             },

@@ -8,10 +8,11 @@ class PageState {
   final List<List<double>> mRawData;
   final List<List<int>> mDataFrame;
   final List<List<int>> mChannelDataFrame;
+  final int mFatigueLevel;
   final int index;
   final DataParser parser;
   PageState(this.mShowFatigeLevel, this.mRawData, this.mDataFrame,
-      this.mChannelDataFrame, this.index, this.parser);
+      this.mChannelDataFrame, this.mFatigueLevel, this.index, this.parser);
 }
 
 class PageController extends Cubit<PageState> {
@@ -21,6 +22,7 @@ class PageController extends Cubit<PageState> {
             [],
             List.generate(127, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(127, 0)),
+            2,
             1,
             DataParser())) {
     init();
@@ -28,8 +30,14 @@ class PageController extends Cubit<PageState> {
 
   void init() async {
     final rawData = await state.parser.readTestCSV();
-    emit(PageState(state.mShowFatigeLevel, rawData, state.mDataFrame,
-        state.mChannelDataFrame, state.index, state.parser));
+    emit(PageState(
+        state.mShowFatigeLevel,
+        rawData,
+        state.mDataFrame,
+        state.mChannelDataFrame,
+        state.mFatigueLevel,
+        state.index,
+        state.parser));
     update();
   }
 
@@ -44,8 +52,14 @@ class PageController extends Cubit<PageState> {
         final List<List<int>> channelDataFrame =
             state.parser.cleanChannelPlotsData(newDataFrame);
 
-        emit(PageState(state.mShowFatigeLevel, state.mRawData, dataFrame,
-            channelDataFrame, state.index + 1, state.parser));
+        emit(PageState(
+            state.mShowFatigeLevel,
+            state.mRawData,
+            dataFrame,
+            channelDataFrame,
+            state.mFatigueLevel,
+            state.index + 1,
+            state.parser));
       } else {
         final List<List<int>> dataFrame =
             state.parser.cleanData(state.mRawData);
@@ -56,6 +70,7 @@ class PageController extends Cubit<PageState> {
             state.mRawData,
             state.parser.averageEveryXRows(127, dataFrame),
             state.parser.averageEveryXColumns(127, channelDataFrame),
+            state.mFatigueLevel,
             state.index,
             state.parser));
         break;
@@ -114,6 +129,7 @@ class TestPage extends StatelessWidget {
                     channelViewHeight: channelViewHeight,
                     index: state.index,
                     showFatigueLevel: state.mShowFatigeLevel,
+                    fatigueLevel: state.mFatigueLevel,
                     channelDataFrame: state.mChannelDataFrame,
                     dataFrame: state.mDataFrame,
                   ),
