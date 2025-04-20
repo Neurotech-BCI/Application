@@ -235,7 +235,7 @@ Widget buildLoadingBar({
 Widget buildFatigueScore({
   required int score,
   int maxScore = 3,
-  double boxSize = 25,
+  double boxSize = 35,
   Color fillColor = const Color(0xFFB39DDB),
 }) {
   assert(score >= 0 && score <= maxScore);
@@ -252,8 +252,8 @@ Widget buildFatigueScore({
           style: TextStyle(
             color: Colors.black,
             fontFamily: 'alte haas grotesk',
-            fontWeight: FontWeight.w500,
-            fontSize: 16.0,
+            fontWeight: FontWeight.w700,
+            fontSize: 18.0,
           ),
         ),
         const SizedBox(width: 6),
@@ -297,12 +297,13 @@ class _FatigueAPIinterfaceState extends State<FatigueAPIinterface> {
         color: Color.fromARGB(255, 0, 0, 0),
         fontFamily: 'alte haas grotesk',
         fontSize: 16.0,
-        fontWeight: FontWeight.w500);
+        fontWeight: FontWeight.w700);
     return SizedBox(
       child: widget.mShowFatigueLevel
           ? buildFatigueScore(score: widget.mFatigeScore)
           : Column(children: [
               Text("Loading EEG Data", style: tStyle),
+              SizedBox(height: 10),
               buildLoadingBar(percent: widget.mIndex / 120)
             ]),
     );
@@ -347,10 +348,10 @@ class ChannelFatigueView extends StatelessWidget {
                   width: screenWidth * 0.5,
                   child: FatigueAPIinterface(index, showFatigueLevel, 2),
                 ),
-                SizedBox(height: channelViewHeight * 0.05),
+                SizedBox(height: channelViewHeight * 0.1),
                 SizedBox(
                   width: screenWidth * 0.575,
-                  height: channelViewHeight * 0.6,
+                  height: channelViewHeight * 0.8,
                   child: SinglePlottedData(dataFrame),
                 ),
               ],
