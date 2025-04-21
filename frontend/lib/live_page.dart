@@ -190,11 +190,11 @@ class LivePage extends StatelessWidget {
                           fontFamily: 'alte haas grotesk',
                           fontWeight: FontWeight.w500)),
                   SizedBox(height: 15),
-                  if (!state.mBeginDataStream)
-                    PasswordInputView(
-                      screenWidth: screenWidth,
-                      viewHeight: channelViewHeight,
-                    ),
+                  // if (!state.mBeginDataStream)
+                  //   PasswordInputView(
+                  //     screenWidth: screenWidth,
+                  //     viewHeight: channelViewHeight,
+                  //   ),
                   if (state.mBeginDataStream)
                     ChannelFatigueView(
                       screenWidth: screenWidth,
