@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'live_page.dart';
 
 final List<Color> channelColors = [
   Color(0xFFE57373), // Red 300 (darker red)
@@ -361,6 +363,66 @@ class ChannelFatigueView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PasswordInputView extends StatefulWidget {
+  final double screenWidth;
+  final double viewHeight;
+
+  const PasswordInputView({
+    super.key,
+    required this.screenWidth,
+    required this.viewHeight,
+  });
+
+  @override
+  _PasswordInputViewState createState() => _PasswordInputViewState();
+}
+
+class _PasswordInputViewState extends State<PasswordInputView> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    // grab your bloc
+    final bloc = context.read<LivePageController>();
+
+    return Expanded(
+      child: SizedBox(
+        height: widget.viewHeight,
+        child: Center(
+          child: SizedBox(
+            width: widget.screenWidth * 0.5,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _controller,
+                  obscureText: true,
+                  obscuringCharacter: '•',
+                  style: const TextStyle(color: Colors.black),
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    final password = _controller.text;
+                    if (password == "fatigue") {
+                      bloc.onStart();
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

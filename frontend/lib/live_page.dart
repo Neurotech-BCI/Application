@@ -4,9 +4,20 @@ import 'package:http/http.dart' as http;
 import 'plotted_data.dart';
 import 'data_reading.dart';
 
+//TODO Develop passkey page
+//TODO parse and clean live Data
+//TODO Test time frequencies for polling and displaying data
+
 class LivePageState {
+  static const int mEEGHz = 127;
+  static const int mFrameSize = 40;
+  static const int mMaxIndex = 120;
+  static const int mMaxFrameIndex = (mEEGHz * mMaxIndex) ~/ mFrameSize;
+  static const String mPassKey = "fatigue";
+
   final String mOutput;
   final int mIndex;
+  final int mFrameIndex;
   final int mFatigeLevel;
   final bool mBeginDataStream;
   final bool mFatigueResponse;
@@ -18,6 +29,7 @@ class LivePageState {
   LivePageState(
       this.mOutput,
       this.mIndex,
+      this.mFrameIndex,
       this.mFatigeLevel,
       this.mBeginDataStream,
       this.mFatigueResponse,
@@ -25,22 +37,64 @@ class LivePageState {
       this.mDataFrame,
       this.mChannelDataFrame,
       this.parser);
+
+  int getFrameSize() {
+    return mFrameSize;
+  }
+
+  int getIndexMax() {
+    return mMaxIndex;
+  }
+
+  int getFrameMax() {
+    return mMaxFrameIndex;
+  }
+
+  String getKey() {
+    return mPassKey;
+  }
 }
 
 class LivePageController extends Cubit<LivePageState> {
   LivePageController()
       : super(LivePageState(
-            "Starting", 1, 0, false, false, [], [], [], DataParser())) {
-    startDemo();
+            "Starting", 0, 0, 0, false, false, [], [], [], DataParser()));
+
+  Future<void> updateData() async {
+    while (state.mFrameIndex < state.getFrameMax()) {
+      int startIndex = state.mFrameIndex * state.getFrameSize();
+      int endIndex =
+          state.getFrameSize() + state.mFrameIndex * state.getFrameSize();
+      if (endIndex < state.mRawData.length) {
+        final newDataFrame = state.mRawData.sublist(startIndex, endIndex);
+        final List<List<int>> dataFrame = state.parser.cleanData(newDataFrame);
+        final List<List<int>> channelDataFrame =
+            state.parser.cleanChannelPlotsData(newDataFrame);
+        emit(LivePageState(
+            state.mOutput,
+            state.mIndex,
+            state.mFrameIndex + 1,
+            state.mFatigeLevel,
+            state.mBeginDataStream,
+            state.mFatigueResponse,
+            state.mRawData,
+            dataFrame,
+            channelDataFrame,
+            state.parser));
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    onStop();
   }
 
-  void poll() async {
-    while (state.mIndex < 120) {
+  Future<void> poll() async {
+    while (state.mIndex < state.getIndexMax()) {
       final response =
           await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
       emit(LivePageState(
           response.body,
           state.mIndex + 1,
+          state.mFrameIndex,
           state.mFatigeLevel,
           state.mBeginDataStream,
           state.mFatigueResponse,
@@ -49,15 +103,16 @@ class LivePageController extends Cubit<LivePageState> {
           state.mChannelDataFrame,
           state.parser));
     }
-    stopDemo();
+    onStop();
   }
 
-  Future<void> startDemo() async {
+  Future<void> onStart() async {
     final response =
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
     emit(LivePageState(
         response.body,
         state.mIndex,
+        state.mFrameIndex,
         state.mFatigeLevel,
         state.mBeginDataStream,
         state.mFatigueResponse,
@@ -68,12 +123,13 @@ class LivePageController extends Cubit<LivePageState> {
     poll();
   }
 
-  Future<void> stopDemo() async {
+  Future<void> onStop() async {
     final response =
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/stop'));
     emit(LivePageState(
         response.body,
         state.mIndex,
+        state.mFrameIndex,
         state.mFatigeLevel,
         state.mBeginDataStream,
         state.mFatigueResponse,
@@ -134,6 +190,11 @@ class LivePage extends StatelessWidget {
                           fontFamily: 'alte haas grotesk',
                           fontWeight: FontWeight.w500)),
                   SizedBox(height: 15),
+                  if (!state.mBeginDataStream)
+                    PasswordInputView(
+                      screenWidth: screenWidth,
+                      viewHeight: channelViewHeight,
+                    ),
                   if (state.mBeginDataStream)
                     ChannelFatigueView(
                       screenWidth: screenWidth,
