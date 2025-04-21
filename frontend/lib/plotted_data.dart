@@ -413,7 +413,7 @@ class _PasswordInputViewState extends State<PasswordInputView> {
                 ElevatedButton(
                   onPressed: () {
                     final password = _controller.text;
-                    if (password == "fatigue") {
+                    if (password == bloc.state.getKey()) {
                       bloc.onStart();
                     }
                   },

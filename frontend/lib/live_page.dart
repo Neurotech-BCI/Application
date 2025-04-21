@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'plotted_data.dart';
 import 'data_reading.dart';
 
-//TODO Develop passkey page
 //TODO parse and clean live Data
 //TODO Test time frequencies for polling and displaying data
 
@@ -58,7 +57,9 @@ class LivePageState {
 class LivePageController extends Cubit<LivePageState> {
   LivePageController()
       : super(LivePageState(
-            "Starting", 0, 0, 0, false, false, [], [], [], DataParser()));
+            "Starting", 0, 0, 0, false, false, [], [], [], DataParser())) {
+    onStart();
+  }
 
   Future<void> updateData() async {
     while (state.mFrameIndex < state.getFrameMax()) {
@@ -107,20 +108,22 @@ class LivePageController extends Cubit<LivePageState> {
   }
 
   Future<void> onStart() async {
-    final response =
-        await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
-    emit(LivePageState(
-        response.body,
-        state.mIndex,
-        state.mFrameIndex,
-        state.mFatigeLevel,
-        state.mBeginDataStream,
-        state.mFatigueResponse,
-        state.mRawData,
-        state.mDataFrame,
-        state.mChannelDataFrame,
-        state.parser));
-    poll();
+    while (true) {
+      final response = await http
+          .post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
+      emit(LivePageState(
+          response.body,
+          state.mIndex,
+          state.mFrameIndex,
+          state.mFatigeLevel,
+          state.mBeginDataStream,
+          state.mFatigueResponse,
+          state.mRawData,
+          state.mDataFrame,
+          state.mChannelDataFrame,
+          state.parser));
+    }
+    //poll();
   }
 
   Future<void> onStop() async {
