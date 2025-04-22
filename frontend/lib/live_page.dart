@@ -57,7 +57,16 @@ class LivePageState {
 class LivePageController extends Cubit<LivePageState> {
   LivePageController()
       : super(LivePageState(
-            "Starting", 0, 0, 0, false, false, [], [], [], DataParser())) {
+            "Starting",
+            0,
+            0,
+            0,
+            false,
+            false,
+            [],
+            List.generate(127, (index) => List.filled(16, 0)),
+            List.generate(16, (index) => List.filled(127, 0)),
+            DataParser())) {
     onStart();
   }
 
@@ -108,22 +117,21 @@ class LivePageController extends Cubit<LivePageState> {
   }
 
   Future<void> onStart() async {
-    while (true) {
-      final response = await http
-          .post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
-      emit(LivePageState(
-          response.body,
-          state.mIndex,
-          state.mFrameIndex,
-          state.mFatigeLevel,
-          state.mBeginDataStream,
-          state.mFatigueResponse,
-          state.mRawData,
-          state.mDataFrame,
-          state.mChannelDataFrame,
-          state.parser));
-    }
-    //poll();
+    final response =
+        await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
+    emit(LivePageState(
+        response.body,
+        state.mIndex,
+        state.mFrameIndex,
+        state.mFatigeLevel,
+        state.mBeginDataStream,
+        state.mFatigueResponse,
+        state.mRawData,
+        state.mDataFrame,
+        state.mChannelDataFrame,
+        state.parser));
+
+    poll();
   }
 
   Future<void> onStop() async {
