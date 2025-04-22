@@ -4,18 +4,14 @@ import 'package:http/http.dart' as http;
 import 'plotted_data.dart';
 import 'data_reading.dart';
 
-//TODO parse and clean live Data
-//TODO Test time frequencies for polling and displaying data
-
 class LivePageState {
   static const int mEEGHz = 127;
   static const int mFrameSize = 40;
-  static const int mMaxIndex = 5;
+  static const int mMaxIndex = 120;
   static const int mMaxFrameIndex = (mEEGHz * mMaxIndex) ~/ mFrameSize;
   static const String mPassKey = "fatigue";
 
   final String mOutput;
-  final int mIndex;
   final int mFrameIndex;
   final int mFatigeLevel;
   final bool mBeginDataStream;
@@ -27,7 +23,6 @@ class LivePageState {
 
   LivePageState(
       this.mOutput,
-      this.mIndex,
       this.mFrameIndex,
       this.mFatigeLevel,
       this.mBeginDataStream,
@@ -64,7 +59,6 @@ class LivePageController extends Cubit<LivePageState> {
             "Starting",
             0,
             0,
-            0,
             false,
             false,
             [],
@@ -86,7 +80,6 @@ class LivePageController extends Cubit<LivePageState> {
             state.parser.cleanChannelPlotsData(newDataFrame);
         emit(LivePageState(
             state.mOutput,
-            state.mIndex,
             state.mFrameIndex + 1,
             state.mFatigeLevel,
             state.mBeginDataStream,
@@ -108,7 +101,6 @@ class LivePageController extends Cubit<LivePageState> {
       List<List<double>> rawFile = state.parser.parseCsv(response.body);
       emit(LivePageState(
           "Data Collected ${rawFile.length}",
-          state.mIndex + 1,
           state.mFrameIndex,
           state.mFatigeLevel,
           state.mBeginDataStream,
@@ -125,7 +117,6 @@ class LivePageController extends Cubit<LivePageState> {
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
     emit(LivePageState(
         response.body,
-        state.mIndex,
         state.mFrameIndex,
         state.mFatigeLevel,
         true,
@@ -143,14 +134,13 @@ class LivePageController extends Cubit<LivePageState> {
         await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/stop'));
     emit(LivePageState(
         response.body,
-        state.mIndex,
         state.mFrameIndex,
-        state.mFatigeLevel,
+        state.mFatigeLevel, // Parse the body
         state.mBeginDataStream,
-        state.mFatigueResponse,
+        true,
         state.mRawData,
-        state.mDataFrame,
-        state.mChannelDataFrame,
+        state.parser.cleanData(state.mRawData),
+        state.parser.cleanChannelPlotsData(state.mRawData),
         state.parser));
   }
 }
@@ -199,11 +189,6 @@ class LivePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Text(state.mOutput,
-                  //     style: TextStyle(
-                  //         fontSize: 16.0,
-                  //         fontFamily: 'alte haas grotesk',
-                  //         fontWeight: FontWeight.w500)),
                   SizedBox(height: 15),
                   if (!state.mBeginDataStream)
                     PasswordInputView(
@@ -214,7 +199,8 @@ class LivePage extends StatelessWidget {
                     ChannelFatigueView(
                       screenWidth: screenWidth,
                       channelViewHeight: channelViewHeight,
-                      index: state.mIndex,
+                      index: state.mFrameIndex,
+                      maxIndex: state.getFrameMax(),
                       showFatigueLevel: state.mFatigueResponse,
                       fatigueLevel: state.mFatigeLevel,
                       channelDataFrame: state.mChannelDataFrame,

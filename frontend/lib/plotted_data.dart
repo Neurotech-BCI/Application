@@ -281,11 +281,12 @@ Widget buildFatigueScore({
 
 class FatigueAPIinterface extends StatefulWidget {
   final int mIndex;
+  final int mMaxIndex;
   final bool mShowFatigueLevel;
   final int mFatigeScore;
 
   const FatigueAPIinterface(
-      this.mIndex, this.mShowFatigueLevel, this.mFatigeScore,
+      this.mIndex, this.mMaxIndex, this.mShowFatigueLevel, this.mFatigeScore,
       {super.key});
 
   @override
@@ -306,7 +307,7 @@ class _FatigueAPIinterfaceState extends State<FatigueAPIinterface> {
           : Column(children: [
               Text("Loading EEG Data", style: tStyle),
               SizedBox(height: 10),
-              buildLoadingBar(percent: widget.mIndex / 120)
+              buildLoadingBar(percent: widget.mIndex / widget.mMaxIndex)
             ]),
     );
   }
@@ -316,6 +317,7 @@ class ChannelFatigueView extends StatelessWidget {
   final double screenWidth;
   final double channelViewHeight;
   final int index;
+  final int maxIndex;
   final bool showFatigueLevel;
   final int fatigueLevel;
   final List<List<int>> channelDataFrame;
@@ -326,6 +328,7 @@ class ChannelFatigueView extends StatelessWidget {
     required this.screenWidth,
     required this.channelViewHeight,
     required this.index,
+    required this.maxIndex,
     required this.showFatigueLevel,
     required this.fatigueLevel,
     required this.channelDataFrame,
@@ -351,7 +354,7 @@ class ChannelFatigueView extends StatelessWidget {
                 SizedBox(
                   width: screenWidth * 0.5,
                   child: FatigueAPIinterface(
-                      index, showFatigueLevel, fatigueLevel),
+                      index, maxIndex, showFatigueLevel, fatigueLevel),
                 ),
                 SizedBox(height: channelViewHeight * 0.1),
                 SizedBox(

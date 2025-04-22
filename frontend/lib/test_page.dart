@@ -128,6 +128,7 @@ class TestPage extends StatelessWidget {
                     screenWidth: screenWidth,
                     channelViewHeight: channelViewHeight,
                     index: state.index,
+                    maxIndex: 120,
                     showFatigueLevel: state.mShowFatigeLevel,
                     fatigueLevel: state.mFatigueLevel,
                     channelDataFrame: state.mChannelDataFrame,
