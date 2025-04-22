@@ -181,4 +181,23 @@ class DataParser {
     }
     return channelsIndexed;
   }
+
+  List<List<double>> parseCsv(String csvBody) {
+    final lines = csvBody.trim().split('\n');
+    if (lines.length <= 1) return [];
+    final dataLines = lines.skip(1);
+    final result = <List<double>>[];
+    for (var line in dataLines) {
+      if (line.trim().isEmpty) continue;
+      final cols = line.split(',');
+      if (cols.length < 17) {
+        continue;
+      }
+      final channelStrings = cols.sublist(1, 17);
+      final channelDoubles =
+          channelStrings.map((s) => double.tryParse(s) ?? 0.0).toList();
+      result.add(channelDoubles);
+    }
+    return result;
+  }
 }

@@ -10,7 +10,7 @@ import 'data_reading.dart';
 class LivePageState {
   static const int mEEGHz = 127;
   static const int mFrameSize = 40;
-  static const int mMaxIndex = 120;
+  static const int mMaxIndex = 5;
   static const int mMaxFrameIndex = (mEEGHz * mMaxIndex) ~/ mFrameSize;
   static const String mPassKey = "fatigue";
 
@@ -49,6 +49,10 @@ class LivePageState {
     return mMaxFrameIndex;
   }
 
+  int getMaxDataWindow() {
+    return mEEGHz * mMaxIndex;
+  }
+
   String getKey() {
     return mPassKey;
   }
@@ -66,7 +70,9 @@ class LivePageController extends Cubit<LivePageState> {
             [],
             List.generate(40, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(40, 0)),
-            DataParser()));
+            DataParser())) {
+    updateData();
+  }
 
   Future<void> updateData() async {
     while (state.mFrameIndex < state.getFrameMax()) {
@@ -96,29 +102,29 @@ class LivePageController extends Cubit<LivePageState> {
   }
 
   Future<void> poll() async {
-    while (state.mIndex < state.getIndexMax()) {
+    while (state.mRawData.length < state.getMaxDataWindow()) {
       final response =
           await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
+      List<List<double>> rawFile = state.parser.parseCsv(response.body);
       emit(LivePageState(
-          response.body,
+          "Data Collected ${rawFile.length}",
           state.mIndex + 1,
           state.mFrameIndex,
           state.mFatigeLevel,
           state.mBeginDataStream,
           state.mFatigueResponse,
-          state.mRawData,
+          rawFile,
           state.mDataFrame,
           state.mChannelDataFrame,
           state.parser));
     }
-    onStop();
   }
 
   Future<void> onStart() async {
-    // final response =
-    //     await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
+    final response =
+        await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
     emit(LivePageState(
-        state.mOutput,
+        response.body,
         state.mIndex,
         state.mFrameIndex,
         state.mFatigeLevel,
