@@ -3,8 +3,8 @@
 ## Tech Stack
 
 - [![Debian][Debian.dev]][Debian-url]
-- [![Actix][Actix.dev]][Actix-url]
 - [![Nginx][Nginx.dev]][Nginx-url]
+- [![Actix][Actix.dev]][Actix-url]
 - [![Flutter][Flutter.dev]][Flutter-url]
 
 <!-- MARKDOWN LINKS & IMAGES -->

@@ -64,11 +64,9 @@ class LivePageController extends Cubit<LivePageState> {
             false,
             false,
             [],
-            List.generate(127, (index) => List.filled(16, 0)),
-            List.generate(16, (index) => List.filled(127, 0)),
-            DataParser())) {
-    onStart();
-  }
+            List.generate(40, (index) => List.filled(16, 0)),
+            List.generate(16, (index) => List.filled(40, 0)),
+            DataParser()));
 
   Future<void> updateData() async {
     while (state.mFrameIndex < state.getFrameMax()) {
@@ -117,14 +115,14 @@ class LivePageController extends Cubit<LivePageState> {
   }
 
   Future<void> onStart() async {
-    final response =
-        await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
+    // final response =
+    //     await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/start'));
     emit(LivePageState(
-        response.body,
+        state.mOutput,
         state.mIndex,
         state.mFrameIndex,
         state.mFatigeLevel,
-        state.mBeginDataStream,
+        true,
         state.mFatigueResponse,
         state.mRawData,
         state.mDataFrame,
@@ -195,17 +193,17 @@ class LivePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Text(state.mOutput,
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          fontFamily: 'alte haas grotesk',
-                          fontWeight: FontWeight.w500)),
+                  // Text(state.mOutput,
+                  //     style: TextStyle(
+                  //         fontSize: 16.0,
+                  //         fontFamily: 'alte haas grotesk',
+                  //         fontWeight: FontWeight.w500)),
                   SizedBox(height: 15),
-                  // if (!state.mBeginDataStream)
-                  //   PasswordInputView(
-                  //     screenWidth: screenWidth,
-                  //     viewHeight: channelViewHeight,
-                  //   ),
+                  if (!state.mBeginDataStream)
+                    PasswordInputView(
+                      screenWidth: screenWidth,
+                      viewHeight: channelViewHeight,
+                    ),
                   if (state.mBeginDataStream)
                     ChannelFatigueView(
                       screenWidth: screenWidth,
