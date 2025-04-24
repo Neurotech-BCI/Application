@@ -23,6 +23,12 @@ final List<Color> channelColors = [
   Color(0xFFF8BBD0), // Pink 200
 ];
 
+final List<Color> scoreColors = [
+  Color(0xFFA5D6A7),
+  Color(0xFFFFE082),
+  Color(0xFFE57373),
+];
+
 class SinglePlottedData extends StatefulWidget {
   final List<List<int>> plotData;
   const SinglePlottedData(this.plotData, {super.key});
@@ -238,7 +244,6 @@ Widget buildFatigueScore({
   required double percent,
   double height = 20,
   Color backgroundColor = const Color.fromARGB(255, 255, 255, 255),
-  Color fillColor = const Color(0xFFF8BBD0),
   double borderRadius = 4,
 }) {
   assert(percent >= 0 && percent <= 1);
@@ -255,7 +260,7 @@ Widget buildFatigueScore({
         widthFactor: percent,
         child: Container(
           decoration: BoxDecoration(
-            color: channelColors[(percent * 15).round()],
+            color: scoreColors[(percent * 2).round()],
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
@@ -289,7 +294,9 @@ class _FatigueAPIinterfaceState extends State<FatigueAPIinterface> {
     return SizedBox(
       child: widget.mShowFatigueLevel
           ? Column(children: [
-              Text("Fatigue Level", style: tStyle),
+              Text(
+                  "User is at a Fatigue level of ${(widget.mFatigeScore * 100).toStringAsFixed(0)}%",
+                  style: tStyle),
               SizedBox(height: 10),
               buildFatigueScore(percent: widget.mFatigeScore)
             ])
