@@ -235,46 +235,31 @@ Widget buildLoadingBar({
 }
 
 Widget buildFatigueScore({
-  required int score,
-  int maxScore = 3,
-  double boxSize = 35,
-  Color fillColor = const Color(0xFFB39DDB),
+  required double percent,
+  double height = 20,
+  Color backgroundColor = const Color.fromARGB(255, 255, 255, 255),
+  Color fillColor = const Color(0xFFF8BBD0),
+  double borderRadius = 4,
 }) {
-  assert(score >= 0 && score <= maxScore);
-
+  assert(percent >= 0 && percent <= 1);
   return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          'Fatigue Score:',
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: 'alte haas grotesk',
-            fontWeight: FontWeight.w700,
-            fontSize: 18.0,
+    height: height,
+    decoration: BoxDecoration(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: Colors.black, width: 1),
+    ),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: FractionallySizedBox(
+        widthFactor: percent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: channelColors[(percent * 15).round()],
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
-        const SizedBox(width: 6),
-        ...List.generate(maxScore, (i) {
-          final filled = i < score;
-          return Padding(
-            padding: EdgeInsets.only(right: i == maxScore - 1 ? 0 : 6),
-            child: Container(
-              height: boxSize,
-              width: boxSize,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: filled ? fillColor : Colors.transparent,
-                border: Border.all(color: Colors.black, width: 1),
-              ),
-            ),
-          );
-        }),
-      ],
+      ),
     ),
   );
 }
@@ -283,7 +268,7 @@ class FatigueAPIinterface extends StatefulWidget {
   final int mIndex;
   final int mMaxIndex;
   final bool mShowFatigueLevel;
-  final int mFatigeScore;
+  final double mFatigeScore;
 
   const FatigueAPIinterface(
       this.mIndex, this.mMaxIndex, this.mShowFatigueLevel, this.mFatigeScore,
@@ -303,7 +288,11 @@ class _FatigueAPIinterfaceState extends State<FatigueAPIinterface> {
         fontWeight: FontWeight.w700);
     return SizedBox(
       child: widget.mShowFatigueLevel
-          ? buildFatigueScore(score: widget.mFatigeScore)
+          ? Column(children: [
+              Text("Fatigue Level", style: tStyle),
+              SizedBox(height: 10),
+              buildFatigueScore(percent: widget.mFatigeScore)
+            ])
           : Column(children: [
               Text("Loading EEG Data", style: tStyle),
               SizedBox(height: 10),
@@ -319,7 +308,7 @@ class ChannelFatigueView extends StatelessWidget {
   final int index;
   final int maxIndex;
   final bool showFatigueLevel;
-  final int fatigueLevel;
+  final double fatigueLevel;
   final List<List<int>> channelDataFrame;
   final List<List<int>> dataFrame;
 
@@ -382,6 +371,7 @@ class PasswordInputView extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _PasswordInputViewState createState() => _PasswordInputViewState();
 }
 
@@ -390,7 +380,6 @@ class _PasswordInputViewState extends State<PasswordInputView> {
 
   @override
   Widget build(BuildContext context) {
-    // grab your bloc
     final bloc = context.read<LivePageController>();
 
     return Expanded(

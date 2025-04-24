@@ -8,7 +8,7 @@ class PageState {
   final List<List<double>> mRawData;
   final List<List<int>> mDataFrame;
   final List<List<int>> mChannelDataFrame;
-  final int mFatigueLevel;
+  final double mFatigueLevel;
   final int index;
   final DataParser parser;
   PageState(this.mShowFatigeLevel, this.mRawData, this.mDataFrame,
@@ -22,7 +22,7 @@ class PageController extends Cubit<PageState> {
             [],
             List.generate(127, (index) => List.filled(16, 0)),
             List.generate(16, (index) => List.filled(127, 0)),
-            2,
+            .47,
             1,
             DataParser())) {
     init();

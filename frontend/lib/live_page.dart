@@ -13,7 +13,7 @@ class LivePageState {
 
   final String mOutput;
   final int mFrameIndex;
-  final int mFatigeLevel;
+  final double mFatigeLevel;
   final bool mBeginDataStream;
   final bool mFatigueResponse;
   final List<List<double>> mRawData;
@@ -130,18 +130,21 @@ class LivePageController extends Cubit<LivePageState> {
   }
 
   Future<void> onStop() async {
-    final response =
-        await http.post(Uri.parse('https://bci-uscneuro.tech/api/demo/stop'));
+    final response = await http.post(
+      Uri.parse('https://bci-uscneuro.tech/api/demo/stop'),
+    );
+    final double inferenceResult = double.tryParse(response.body.trim()) ?? 0.0;
     emit(LivePageState(
-        response.body,
-        state.mFrameIndex,
-        state.mFatigeLevel, // Parse the body
-        state.mBeginDataStream,
-        true,
-        state.mRawData,
-        state.parser.cleanData(state.mRawData),
-        state.parser.cleanChannelPlotsData(state.mRawData),
-        state.parser));
+      state.mOutput,
+      state.mFrameIndex,
+      inferenceResult,
+      state.mBeginDataStream,
+      true,
+      state.mRawData,
+      state.parser.cleanData(state.mRawData),
+      state.parser.cleanChannelPlotsData(state.mRawData),
+      state.parser,
+    ));
   }
 }
 
