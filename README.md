@@ -20,24 +20,21 @@
 
 ## Team
 
-| [<img src="https://github.com/AsherHoltham.png" width="80" height="80" style="border-radius: 50%;" />][Asher-Contact] | [<img src="Assets/Yaoyue.jpeg" width="80" height="80" style="border-radius: 50%;" />][Yaoyue-Contact] | [<img src="Assets/Derick.jpeg" width="80" height="80" style="border-radius: 50%;" />][Derick-Contact] | [<img src="Assets/Floyd.jpeg" width="80" height="80" style="border-radius: 50%;" />][Floyd-Contact] |
-|:---:|:---:|:---:|:---:|:---:|
-| **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Hardware-Interface](https://img.shields.io/badge/-Data-2F3C7E?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Development](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) | -->
+| [<img src="[Asher-img]" width="80" height="80" style="border-radius:50%;" />][Asher-Contact] | [<img src="[Yaoyue-img]" width="80" height="80" style="border-radius:50%;" />][Yaoyue-Contact] | [<img src="[Derick-img]" width="80" height="80" style="border-radius:50%;" />][Derick-Contact] | [<img src="[Floyd-img]" width="80" height="80" style="border-radius:50%;" />][Floyd-Contact] |
+|:---:|:---:|:---:|:---:|
+| **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Data](https://img.shields.io/badge/-Data-2F3C7E?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 
-[Yaoyue-Contact]: https://www.linkedin.com/in/yaoyuewang/
 [Asher-Contact]: https://www.linkedin.com/in/asher-holtham/
-<!-- [Olivia-Contact]: https://www.linkedin.com/in/olivia-liau-b3074b230/ -->
-[Floyd-Contact]: https://www.linkedin.com/in/floydstott/
+[Yaoyue-Contact]: https://www.linkedin.com/in/yaoyuewang/
 [Derick-Contact]: https://www.linkedin.com/in/derick-walker/
+[Floyd-Contact]: https://www.linkedin.com/in/floydstott/
 
-[Yaoyue-img]: Assets/Yaoyue.jpeg
 [Asher-img]: https://github.com/AsherHoltham.png
-<!-- [Olivia-img]: Assets/Olivia.jpeg -->
-[Floyd-img]: Assets/Floyd.jpeg
+[Yaoyue-img]: Assets/Yaoyue.jpeg
 [Derick-img]: Assets/Derick.jpeg
+[Floyd-img]: Assets/Floyd.jpeg
 
 [lead-clr]: #F9E795
 [dev-clr]: #2F3C7E
-<!-- [frntend-clr]: #7A2048 -->
 [fullstack-clr]: #AFD275
 [design-clr]: #F96167
