@@ -1,18 +1,15 @@
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:math';
 
 class DataParser {
   DataParser();
 
-  /// Groups every [x] rows, averages them (rounding to int), and emits one row per group.
-  /// - Input:  matrix of size R×C
-  /// - Output: matrix of size ⌈R/x⌉×C, with int averages
   List<List<int>> averageEveryXRows(int x, List<List<int>> matrix) {
     if (x <= 0) throw ArgumentError.value(x, 'x must be > 0');
     final rowCount = matrix.length;
     if (rowCount == 0) return [];
     final colCount = matrix[0].length;
-    // verify rectangular
     for (var row in matrix) {
       if (row.length != colCount) {
         throw ArgumentError('All rows must have the same length');
@@ -41,15 +38,11 @@ class DataParser {
     return result;
   }
 
-  /// Groups every [x] columns, averages them (rounding to int), and emits one column per group.
-  /// - Input:  matrix of size R×C
-  /// - Output: matrix of size R×⌈C/x⌉, with int averages
   List<List<int>> averageEveryXColumns(int x, List<List<int>> matrix) {
     if (x <= 0) throw ArgumentError.value(x, 'x must be > 0');
     final rowCount = matrix.length;
     if (rowCount == 0) return [];
     final colCount = matrix[0].length;
-    // verify rectangular
     for (var row in matrix) {
       if (row.length != colCount) {
         throw ArgumentError('All rows must have the same length');
@@ -199,5 +192,69 @@ class DataParser {
       result.add(channelDoubles);
     }
     return result;
+  }
+
+  List<List<double>> parseCsvWithBandPass(String csvBody) {
+    const fs = 127.0;
+    const lowCut = 0.5;
+    const highCut = 40.0;
+    final f0 = (lowCut + highCut) / 2;
+    final bw = highCut - lowCut;
+    final q = f0 / bw;
+
+    final filters = List<BandPassFilter>.generate(
+      16,
+      (_) => BandPassFilter(fs: fs, f0: f0, q: q),
+    );
+
+    final result = <List<double>>[];
+
+    final lines = csvBody.trim().split('\n');
+    if (lines.length <= 1) return result;
+    for (var line in lines.skip(1)) {
+      if (line.trim().isEmpty) continue;
+      final cols = line.split(',');
+      if (cols.length < 17) continue;
+
+      final raw =
+          cols.sublist(1, 17).map((s) => double.tryParse(s) ?? 0.0).toList();
+
+      final filtered = List<double>.generate(
+        16,
+        (ch) => filters[ch].process(raw[ch]),
+      );
+
+      result.add(filtered);
+    }
+
+    return result;
+  }
+}
+
+class BandPassFilter {
+  final double b0, b1, b2, a1, a2;
+  double _x1 = 0, _x2 = 0, _y1 = 0, _y2 = 0;
+
+  BandPassFilter({
+    required double fs,
+    required double f0,
+    required double q,
+  })  : assert(fs > 0 && f0 > 0 && q > 0),
+        b0 = _alpha(fs, f0, q) / (1 + _alpha(fs, f0, q)),
+        b1 = 0,
+        b2 = -_alpha(fs, f0, q) / (1 + _alpha(fs, f0, q)),
+        a1 = -2 * cos(2 * pi * f0 / fs) / (1 + _alpha(fs, f0, q)),
+        a2 = (1 - _alpha(fs, f0, q)) / (1 + _alpha(fs, f0, q));
+
+  static double _alpha(double fs, double f0, double q) =>
+      sin(2 * pi * f0 / fs) / (2 * q);
+
+  double process(double x0) {
+    final y0 = b0 * x0 + b1 * _x1 + b2 * _x2 - a1 * _y1 - a2 * _y2;
+    _x2 = _x1;
+    _x1 = x0;
+    _y2 = _y1;
+    _y1 = y0;
+    return y0;
   }
 }

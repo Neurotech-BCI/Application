@@ -114,7 +114,8 @@ class LivePageController extends Cubit<LivePageState> {
     while (state.mRawData.length < state.getMaxDataWindow()) {
       final response =
           await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
-      List<List<double>> rawFile = state.parser.parseCsv(response.body);
+      List<List<double>> rawFile = state.parser.parseCsvWithBandPass(
+          response.body); // I added bandpass here : todo test this bad boy
       emit(LivePageState(
           "Data Collected ${rawFile.length}",
           state.mFrameIndex,
