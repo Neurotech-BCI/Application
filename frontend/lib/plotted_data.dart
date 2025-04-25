@@ -426,3 +426,32 @@ class _PasswordInputViewState extends State<PasswordInputView> {
     );
   }
 }
+
+class LoadingFatigueView extends StatelessWidget {
+  final double screenWidth;
+  final double viewHeight;
+
+  const LoadingFatigueView({
+    super.key,
+    required this.screenWidth,
+    required this.viewHeight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const TextStyle tStyle = TextStyle(
+        color: Color.fromARGB(255, 0, 0, 0),
+        fontFamily: 'alte haas grotesk',
+        fontSize: 32.0,
+        fontWeight: FontWeight.w700);
+    return Expanded(
+      child: SizedBox(
+        height: viewHeight,
+        child: const Center(
+          child: Text('Loading Fatigue Score',
+              textAlign: TextAlign.center, style: tStyle),
+        ),
+      ),
+    );
+  }
+}
