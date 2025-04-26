@@ -20,7 +20,7 @@
 
 ## Team
 
-| [<img src="[Asher-img]" width="80" height="80" style="border-radius:50%;" />][Asher-Contact] | [<img src="[Yaoyue-img]" width="80" height="80" style="border-radius:50%;" />][Yaoyue-Contact] | [<img src="[Derick-img]" width="80" height="80" style="border-radius:50%;" />][Derick-Contact] | [<img src="[Floyd-img]" width="80" height="80" style="border-radius:50%;" />][Floyd-Contact] |
+| [![Asher Holtham][Asher-img]][Asher-Contact] | [![Yaoyue Wang][Yaoyue-img]][Yaoyue-Contact] | [![Derick Walker][Derick-img]][Derick-Contact] | [![Floyd Stott][Floyd-img]][Floyd-Contact] |
 |:---:|:---:|:---:|:---:|
 | **[Asher Holtham][Asher-Contact]**<br>![Team Lead](https://img.shields.io/badge/-Team%20Lead-F9E795?style=flat-square) | **[Yaoyue Wang][Yaoyue-Contact]**<br>![Data](https://img.shields.io/badge/-Data-2F3C7E?style=flat-square) | **[Derick Walker][Derick-Contact]**<br>![Fullstack](https://img.shields.io/badge/-Fullstack-AFD275?style=flat-square) | **[Floyd Stott][Floyd-Contact]**<br>![Design](https://img.shields.io/badge/-Design-F96167?style=flat-square) |
 

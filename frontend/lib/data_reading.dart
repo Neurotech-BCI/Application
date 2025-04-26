@@ -1,6 +1,6 @@
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'dart:math';
+import 'dart:math' as math;
 
 class DataParser {
   DataParser();
@@ -208,9 +208,10 @@ class DataParser {
     );
 
     final result = <List<double>>[];
-
     final lines = csvBody.trim().split('\n');
     if (lines.length <= 1) return result;
+
+    bool isFirstSample = true;
     for (var line in lines.skip(1)) {
       if (line.trim().isEmpty) continue;
       final cols = line.split(',');
@@ -219,12 +220,19 @@ class DataParser {
       final raw =
           cols.sublist(1, 17).map((s) => double.tryParse(s) ?? 0.0).toList();
 
-      final filtered = List<double>.generate(
-        16,
-        (ch) => filters[ch].process(raw[ch]),
-      );
-
-      result.add(filtered);
+      if (isFirstSample) {
+        for (var ch = 0; ch < filters.length; ch++) {
+          filters[ch].reset(raw[ch]);
+        }
+        result.add(raw);
+        isFirstSample = false;
+      } else {
+        final filtered = List<double>.generate(
+          16,
+          (ch) => filters[ch].process(raw[ch]),
+        );
+        result.add(filtered);
+      }
     }
 
     return result;
@@ -232,29 +240,45 @@ class DataParser {
 }
 
 class BandPassFilter {
-  final double b0, b1, b2, a1, a2;
-  double _x1 = 0, _x2 = 0, _y1 = 0, _y2 = 0;
+  final double fs;
+  final double f0;
+  final double q;
+
+  late final double b0, b1, b2, a1, a2;
+
+  double _x1 = 0, _x2 = 0;
+  double _y1 = 0, _y2 = 0;
 
   BandPassFilter({
-    required double fs,
-    required double f0,
-    required double q,
-  })  : assert(fs > 0 && f0 > 0 && q > 0),
-        b0 = _alpha(fs, f0, q) / (1 + _alpha(fs, f0, q)),
-        b1 = 0,
-        b2 = -_alpha(fs, f0, q) / (1 + _alpha(fs, f0, q)),
-        a1 = -2 * cos(2 * pi * f0 / fs) / (1 + _alpha(fs, f0, q)),
-        a2 = (1 - _alpha(fs, f0, q)) / (1 + _alpha(fs, f0, q));
+    required this.fs,
+    required this.f0,
+    required this.q,
+  }) {
+    final omega = 2 * math.pi * f0 / fs;
+    final alpha = math.sin(omega) / (2 * q);
+    final cosw = math.cos(omega);
 
-  static double _alpha(double fs, double f0, double q) =>
-      sin(2 * pi * f0 / fs) / (2 * q);
+    final a0 = 1 + alpha;
+    b0 = alpha / a0;
+    b1 = 0.0;
+    b2 = -alpha / a0;
+    a1 = -2 * cosw / a0;
+    a2 = (1 - alpha) / a0;
+  }
+
+  void reset(double seed) {
+    _x1 = _x2 = seed;
+    _y1 = _y2 = seed;
+  }
 
   double process(double x0) {
     final y0 = b0 * x0 + b1 * _x1 + b2 * _x2 - a1 * _y1 - a2 * _y2;
+
     _x2 = _x1;
     _x1 = x0;
     _y2 = _y1;
     _y1 = y0;
+
     return y0;
   }
 }

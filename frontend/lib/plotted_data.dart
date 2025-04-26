@@ -72,7 +72,7 @@ class SinglePlotRenderer extends CustomPainter {
     for (int i = 0; i < channelColors.length; i++) {
       final paint = Paint()
         ..color = channelColors[i]
-        ..strokeWidth = 0.6
+        ..strokeWidth = .8
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 

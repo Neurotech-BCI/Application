@@ -9,6 +9,7 @@ class LivePageState {
   static const int mEEGHz = 127;
   static const int mFrameSize = 90;
   static const int mMaxIndex = 120;
+  static const int mOffset = 127;
   static const int mMaxFrameIndex = (mEEGHz * mMaxIndex) ~/ mFrameSize;
   static const String mPassKey = "fatigue";
 
@@ -49,6 +50,10 @@ class LivePageState {
 
   int getMaxDataWindow() {
     return mEEGHz * mMaxIndex;
+  }
+
+  int getOffset() {
+    return mOffset;
   }
 
   String getKey() {
@@ -155,7 +160,7 @@ class LivePageController extends Cubit<LivePageState> {
         state.mFatigeLevel,
         state.mBeginDataStream,
         state.mFatigueResponse,
-        state.mRawData,
+        state.mRawData.sublist(state.getOffset(), state.mRawData.length),
         state.mDataFrame,
         state.mChannelDataFrame,
         state.parser,
