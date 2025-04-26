@@ -129,7 +129,8 @@ class _ChannelPlottedDataState extends State<ChannelPlottedData> {
               ),
             ),
             child: Row(children: [
-              Text("Channel  ${widget.channelIndex}", style: channelLabelStyle),
+              Text("Channel  ${widget.channelIndex + 1}",
+                  style: channelLabelStyle),
               SizedBox(width: openSpace / 6),
               Container(
                 height: colorDim,

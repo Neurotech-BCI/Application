@@ -8,9 +8,9 @@ import 'dart:convert';
 class LivePageState {
   static const int mEEGHz = 127;
   static const int mFrameSize = 90;
-  static const int mMaxIndex = 120;
-  static const int mOffset = 127;
+  static const int mMaxIndex = 60;
   static const int mMaxFrameIndex = (mEEGHz * mMaxIndex) ~/ mFrameSize;
+  static const int mOffset = 127;
   static const String mPassKey = "fatigue";
 
   final String mOutput;
@@ -119,8 +119,10 @@ class LivePageController extends Cubit<LivePageState> {
     while (state.mRawData.length < state.getMaxDataWindow()) {
       final response =
           await http.get(Uri.parse('https://bci-uscneuro.tech/api/data'));
-      List<List<double>> rawFile = state.parser.parseCsvWithBandPass(
-          response.body); // I added bandpass here : todo test this bad boy
+      print(response);
+      List<List<double>> rawFile =
+          state.parser.parseCsvWithBandPass(response.body);
+      print(rawFile);
       emit(LivePageState(
           "Data Collected ${rawFile.length}",
           state.mFrameIndex,
@@ -160,7 +162,7 @@ class LivePageController extends Cubit<LivePageState> {
         state.mFatigeLevel,
         state.mBeginDataStream,
         state.mFatigueResponse,
-        state.mRawData.sublist(state.getOffset(), state.mRawData.length),
+        state.mRawData,
         state.mDataFrame,
         state.mChannelDataFrame,
         state.parser,
@@ -175,6 +177,10 @@ class LivePageController extends Cubit<LivePageState> {
         ? pred.toDouble()
         : double.tryParse(pred.toString().trim()) ?? 0.0;
 
+    final newDataFrame =
+        state.mRawData.sublist(state.getOffset(), state.mRawData.length);
+    print(newDataFrame);
+
     emit(LivePageState(
         state.mOutput,
         state.mFrameIndex,
@@ -182,8 +188,8 @@ class LivePageController extends Cubit<LivePageState> {
         state.mBeginDataStream,
         state.mFatigueResponse,
         state.mRawData,
-        state.parser.cleanData(state.mRawData),
-        state.parser.cleanChannelPlotsData(state.mRawData),
+        state.parser.cleanData(newDataFrame),
+        state.parser.cleanChannelPlotsData(newDataFrame),
         state.parser,
         false));
   }
